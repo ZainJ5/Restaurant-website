@@ -12,7 +12,7 @@ export default function Hero() {
 
       <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden">
         <Image
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4fvopJhL8eK6MCbvGjrEl8zGbNP62y0WCnQ&s"
+          src="/hero.jpg"
           alt="Hero"
           fill
           style={{ objectFit: 'cover' }}

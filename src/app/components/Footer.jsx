@@ -63,10 +63,7 @@ export default function Footer() {
           >
             <span
               className="absolute left-[6px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-cover bg-no-repeat"
-              style={{
-                backgroundImage:
-                  "url('https://schlemmige.web.app/static/media/appStore.22c15919.svg')",
-              }}
+                style={{ backgroundImage: `url('/apple.png')` }}
             ></span>
             <span className="absolute top-[5px] left-[40px] text-[10px] font-normal">
               Download on the

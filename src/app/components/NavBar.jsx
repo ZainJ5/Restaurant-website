@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import whatsapp from '../../../public/whatsapp-logo.png'
 
 export default function Navbar() {
     return (
@@ -50,29 +51,28 @@ export default function Navbar() {
                         </div>
 
                         <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-                            {[
-                                { src: '/download.png', bg: 'bg-red-700' },
-                                { src: '/whatsapp.png', bg: 'bg-green-500' },
-                                { src: '/phone.png', bg: 'bg-blue-500' },
-                                { src: '/facebook.png', bg: 'bg-blue-600' },
-                                { src: '/instagram.png', bg: 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500' }
-                            ].map((item, index) => (
-                                <Link
-                                    key={index}
-                                    href="#"
-                                    className={`${item.bg} rounded flex items-center justify-center p-1.5 sm:p-2 hover:opacity-90 transition-opacity`}
-                                    style={{ minWidth: '32px', minHeight: '32px' }}
-                                >
-                                    <Image 
-                                        src={item.src} 
-                                        alt="Social" 
-                                        width={20} 
-                                        height={20} 
-                                        className="w-4 h-4 sm:w-5 sm:h-5"
-                                    />
-                                </Link>
-                            ))}
-                        </div>
+  {[
+    { src: '/download.png', bg: 'bg-red-700' },
+    { src: whatsapp.src, bg: 'bg-[rgb(42,168,26)]' },
+    { src: '/phone.png', bg: 'bg-blue-500' },
+    { src: '/facebook.png', bg: 'bg-[rgb(12,144,242)]' },
+    { src: '/instagram.png', bg: 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500' }
+  ].map((item, index) => (
+    <Link
+      key={index}
+      href="#"
+      className={`${item.bg} rounded relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
+    >
+      <Image 
+        src={item.src} 
+        alt="Social" 
+        fill
+        className="object-contain scale-90 p-[2px]"
+        sizes="(max-width: 640px) 32px, 40px"
+      />
+    </Link>
+  ))}
+</div>
 
                     </div>
                 </div>
