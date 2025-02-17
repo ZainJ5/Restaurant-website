@@ -5,9 +5,9 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 relative">
-        <div className="inline-flex items-center justify-center rounded-full border-4 border-yellow-400 w-32 h-32 
-                        bg-white absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 z-10">
-          <span className="text-2xl font-bold">LOGO</span>
+        <div className="relative rounded-full border-4 border-yellow-400 w-32 h-32 
+                        bg-white absolute left-1/2 top-[-50px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
+          <Image src="/Logo.jpeg" alt="Logo" layout="fill" objectFit="cover" />
         </div>
 
         <div className="text-center mt-16">
