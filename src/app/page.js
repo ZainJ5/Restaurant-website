@@ -7,7 +7,7 @@ import Banner from '../app/components/Banner'
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white">
       <Hero />
       <Navbar />
       <MenuTabs />
