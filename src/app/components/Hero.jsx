@@ -1,36 +1,122 @@
+'use client'
+
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { FaShoppingCart, FaCreditCard } from 'react-icons/fa';
 
+function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
+  const [styles, setStyles] = useState({
+    opacity: animateIn ? 0 : 1,
+    transform: animateIn ? 'scale(0.95)' : 'scale(1)',
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (animateIn) {
+        setStyles({ opacity: 1, transform: 'scale(1)' });
+      }
+      if (animateOut) {
+        setStyles({ opacity: 0, transform: 'scale(1.05)' });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [animateIn, animateOut]);
+
+  return (
+    <div
+      style={{
+        ...styles,
+        transition: 'opacity 0.8s ease-in-out, transform 0.8s ease-in-out',
+      }}
+      onTransitionEnd={onAnimationEnd}
+      className="w-full h-full"
+    >
+      <Image src={src} alt={alt} fill style={{ objectFit: 'cover' }} priority />
+    </div>
+  );
+}
+
 export default function Hero() {
+  const images = ["/hero.jpg", "/hero-2.jpg", "/hero-3.jpg"];
+
+  const [sliderState, setSliderState] = useState({
+    current: 0,
+    previous: null,
+  });
+
+  const updateImage = (newIndex) => {
+    if (newIndex === sliderState.current) return;
+    setSliderState((prev) => ({
+      previous: prev.current,
+      current: newIndex,
+    }));
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSliderState((prev) => ({
+        previous: prev.current,
+        current: (prev.current + 1) % images.length,
+      }));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   return (
     <section className="relative">
-      <div className="bg-white text-center py-2">
-        <h2 className="text-red-600 text-lg md:text-2xl font-semibold">
+      <div className="bg-white text-center py-1">
+        <h2 className="text-red-600 text-sm md:text-xl font-semibold">
           Welcome Restaurant Name - Flat 10% Off on all Items
         </h2>
       </div>
 
-      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden">
-        <Image
-          src="/hero.jpg"
-          alt="Hero"
-          fill
-          style={{ objectFit: 'cover' }}
-          priority
-        />
+      {/* Responsive container with fixed aspect ratio */}
+      <div className="relative w-full aspect-[750/309] overflow-hidden">
+        {sliderState.previous !== null && (
+          <div className="absolute inset-0">
+            <FadeImage
+              src={images[sliderState.previous]}
+              alt="Hero"
+              animateOut={true}
+              onAnimationEnd={() =>
+                setSliderState((prev) => ({ ...prev, previous: null }))
+              }
+            />
+          </div>
+        )}
+        <div className="absolute inset-0">
+          <FadeImage
+            src={images[sliderState.current]}
+            alt="Hero"
+            animateIn={sliderState.previous !== null}
+          />
+        </div>
 
+        {/* Responsive button */}
         <div className="absolute top-4 right-4 z-10">
-          <button className="bg-red-500 text-white px-4 py-2 rounded-md flex items-center shadow-lg">
-            <FaShoppingCart className="mr-1" />
+          <button className="bg-red-500 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md flex items-center shadow-lg text-xs sm:text-sm md:text-base">
+            <FaShoppingCart className="mr-1 text-xs sm:text-sm md:text-base" />
             <span>1</span>
-
-            <div className="mx-3 h-5 w-px bg-white"></div>
-
-            <FaCreditCard className="mr-1" />
+            <div className="mx-2 sm:mx-3 h-4 sm:h-5 w-px bg-white"></div>
+            <FaCreditCard className="mr-1 text-xs sm:text-sm md:text-base" />
             <span>Rs. 750</span>
           </button>
         </div>
 
+        {/* Navigation dots */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => updateImage(index)}
+              className={`w-3 h-3 rounded-full focus:outline-none ${
+                sliderState.current === index ? 'bg-white' : 'bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* SVG shape at the bottom */}
         <div className="absolute bottom-[-6px] left-0 w-full">
           <div className="w-full" style={{ aspectRatio: '1765.2256 / 102.3469' }}>
             <svg
