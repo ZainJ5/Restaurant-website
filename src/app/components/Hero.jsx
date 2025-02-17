@@ -70,7 +70,6 @@ export default function Hero() {
         </h2>
       </div>
 
-      {/* Responsive container with fixed aspect ratio */}
       <div className="relative w-full aspect-[750/309] overflow-hidden">
         {sliderState.previous !== null && (
           <div className="absolute inset-0">
@@ -92,7 +91,6 @@ export default function Hero() {
           />
         </div>
 
-        {/* Responsive button */}
         <div className="absolute top-4 right-4 z-10">
           <button className="bg-red-500 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md flex items-center shadow-lg text-xs sm:text-sm md:text-base">
             <FaShoppingCart className="mr-1 text-xs sm:text-sm md:text-base" />
@@ -103,7 +101,6 @@ export default function Hero() {
           </button>
         </div>
 
-        {/* Navigation dots */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {images.map((_, index) => (
             <button
@@ -116,7 +113,6 @@ export default function Hero() {
           ))}
         </div>
 
-        {/* SVG shape at the bottom */}
         <div className="absolute bottom-[-6px] left-0 w-full">
           <div className="w-full" style={{ aspectRatio: '1765.2256 / 102.3469' }}>
             <svg
