@@ -1,26 +1,28 @@
 'use client'
+import Image from 'next/image'
+import { useState, useEffect } from 'react'
+import { FaShoppingCart, FaCreditCard } from 'react-icons/fa'
+import { useCart } from '../context/CartContext'
+import CartDrawer from './Cart'  
 
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { FaShoppingCart, FaCreditCard } from 'react-icons/fa';
 
 function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
   const [styles, setStyles] = useState({
     opacity: animateIn ? 0 : 1,
     transform: animateIn ? 'scale(0.95)' : 'scale(1)',
-  });
+  })
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (animateIn) {
-        setStyles({ opacity: 1, transform: 'scale(1)' });
+        setStyles({ opacity: 1, transform: 'scale(1)' })
       }
       if (animateOut) {
-        setStyles({ opacity: 0, transform: 'scale(1.05)' });
+        setStyles({ opacity: 0, transform: 'scale(1.05)' })
       }
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [animateIn, animateOut]);
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [animateIn, animateOut])
 
   return (
     <div
@@ -33,23 +35,23 @@ function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
     >
       <Image src={src} alt={alt} fill style={{ objectFit: 'cover' }} priority />
     </div>
-  );
+  )
 }
 
 function BannerSwiper() {
   const banners = [
-    "Welcome Restaurant Name",
-    "Flat 10% Off on all Items",
-    "Discover Our Special Dishes",
-  ];
-  const [currentBanner, setCurrentBanner] = useState(0);
+    'Welcome Restaurant Name',
+    'Flat 10% Off on all Items',
+    'Discover Our Special Dishes',
+  ]
+  const [currentBanner, setCurrentBanner] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % banners.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [banners.length]);
+      setCurrentBanner((prev) => (prev + 1) % banners.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [banners.length])
 
   return (
     <div className="bg-white text-center py-1">
@@ -57,34 +59,37 @@ function BannerSwiper() {
         {banners[currentBanner]}
       </h2>
     </div>
-  );
+  )
 }
 
 export default function Hero() {
-  const images = ["/hero.jpg", "/hero-2.jpg", "/hero-3.jpg"];
+  const images = ['/hero.jpg', '/hero-2.jpg', '/hero-3.jpg']
+  const { cart } = useCart()
 
   const [sliderState, setSliderState] = useState({
     current: 0,
     previous: null,
-  });
+  })
+
+  const [isCartOpen, setIsCartOpen] = useState(false)
 
   const updateImage = (newIndex) => {
-    if (newIndex === sliderState.current) return;
+    if (newIndex === sliderState.current) return
     setSliderState((prev) => ({
       previous: prev.current,
       current: newIndex,
-    }));
-  };
+    }))
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
       setSliderState((prev) => ({
         previous: prev.current,
         current: (prev.current + 1) % images.length,
-      }));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [images.length]);
+      }))
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [images.length])
 
   return (
     <section className="relative">
@@ -112,16 +117,19 @@ export default function Hero() {
         </div>
 
         <div className="absolute top-4 right-4 z-10">
-          <button className="bg-red-500 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md flex items-center shadow-lg text-xs sm:text-sm md:text-base">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-md flex items-center shadow-lg text-xs sm:text-sm md:text-base"
+          >
             <FaShoppingCart className="mr-1 text-xs sm:text-sm md:text-base" />
-            <span>1</span>
+            <span>{cart.items.length}</span>
             <div className="mx-2 sm:mx-3 h-4 sm:h-5 w-px bg-white"></div>
             <FaCreditCard className="mr-1 text-xs sm:text-sm md:text-base" />
-            <span>Rs. 750</span>
+            <span>Rs. {cart.total}</span>
           </button>
         </div>
 
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden sm:flex gap-2 z-10">
           {images.map((_, index) => (
             <button
               key={index}
@@ -149,6 +157,8 @@ export default function Hero() {
           </div>
         </div>
       </div>
+
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </section>
-  );
+  )
 }

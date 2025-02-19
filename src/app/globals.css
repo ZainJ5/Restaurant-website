@@ -19,3 +19,24 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.checkout-button {
+  transition: all 0.3s ease;
+}
+
+.checkout-button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2);
+}
+
+.recommendation-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-2px);
+}

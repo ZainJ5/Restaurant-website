@@ -10,7 +10,7 @@ export default function Footer() {
           <Image src="/Logo.jpeg" alt="Logo" layout="fill" objectFit="cover" />
         </div>
 
-        <div className="text-center mt-2">
+        <div className="text-center mt-[-50px]">
           <h2 className="text-2xl font-bold">Restaurant Name</h2>
 
           <p className="mt-2">
