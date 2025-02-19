@@ -48,7 +48,7 @@ export default function SuperDeals() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 py-8 mb-16">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {deals.map((deal) => (
           <div key={deal.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative h-48 w-full">

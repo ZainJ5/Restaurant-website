@@ -36,6 +36,30 @@ function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
   );
 }
 
+function BannerSwiper() {
+  const banners = [
+    "Welcome Restaurant Name",
+    "Flat 10% Off on all Items",
+    "Discover Our Special Dishes",
+  ];
+  const [currentBanner, setCurrentBanner] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [banners.length]);
+
+  return (
+    <div className="bg-white text-center py-1">
+      <h2 className="text-red-600 text-sm md:text-xl font-semibold">
+        {banners[currentBanner]}
+      </h2>
+    </div>
+  );
+}
+
 export default function Hero() {
   const images = ["/hero.jpg", "/hero-2.jpg", "/hero-3.jpg"];
 
@@ -64,11 +88,7 @@ export default function Hero() {
 
   return (
     <section className="relative">
-      <div className="bg-white text-center py-1">
-        <h2 className="text-red-600 text-sm md:text-xl font-semibold">
-          Welcome Restaurant Name - Flat 10% Off on all Items
-        </h2>
-      </div>
+      <BannerSwiper />
 
       <div className="relative w-full aspect-[750/309] overflow-hidden">
         {sliderState.previous !== null && (

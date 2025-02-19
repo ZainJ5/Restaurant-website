@@ -4,13 +4,13 @@ import Link from 'next/link'
 export default function Footer() {
   return (
     <footer className="bg-white border-t">
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 relative">
+      <div className="max-w-7xl mx-auto px-4 pb-12 sm:px-6 lg:px-8 relative">
         <div className="relative rounded-full border-4 border-yellow-400 w-32 h-32 
-                        bg-white absolute left-1/2 top-[-50px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
+                        bg-white absolute left-1/2 top-[0px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
           <Image src="/Logo.jpeg" alt="Logo" layout="fill" objectFit="cover" />
         </div>
 
-        <div className="text-center mt-16">
+        <div className="text-center mt-2">
           <h2 className="text-2xl font-bold">Restaurant Name</h2>
 
           <p className="mt-2">
@@ -63,7 +63,7 @@ export default function Footer() {
           >
             <span
               className="absolute left-[6px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-cover bg-no-repeat"
-                style={{ backgroundImage: `url('/apple.png')` }}
+              style={{ backgroundImage: `url('/apple.png')` }}
             ></span>
             <span className="absolute top-[5px] left-[40px] text-[10px] font-normal">
               Download on the
