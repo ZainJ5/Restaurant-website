@@ -22,7 +22,7 @@ export default function AdminPage() {
 
   return (
     <div>
-      <div className="flex justify-end p-4">
+      <div className="flex justify-end text-black p-4">
         <button
           onClick={handleLogout}
           className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"

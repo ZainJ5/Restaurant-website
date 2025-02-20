@@ -24,7 +24,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-100 to-gray-200 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r text-black from-gray-100 to-gray-200 p-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
           Admin Login
