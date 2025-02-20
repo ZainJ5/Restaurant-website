@@ -138,7 +138,7 @@ export default function AdminPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen text-black bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row h-auto md:h-[80vh]">
         <div className={`w-full md:w-1/4 bg-blue-600 text-white p-6 ${isSidebarOpen ? "block" : "hidden"} md:block`}>
           <h2 className="text-2xl font-bold mb-6">Admin Menu</h2>
