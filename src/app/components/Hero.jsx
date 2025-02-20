@@ -135,10 +135,10 @@ export default function Hero() {
               rounded-md
             "
           >
-            <FaShoppingCart className="mr-2 text-xs sm:text-sm md:text-base" />
+            <FaShoppingCart className="mr-2 text-sm sm:text-base md:text-lg" />
             <span>{items.length}</span>
             <div className="mx-3 h-4 sm:h-5 w-px bg-white"></div>
-            <FaCreditCard className="mr-2 text-xs sm:text-sm md:text-base" />
+            <FaCreditCard className="mr-2 text-sm sm:text-base md:text-lg" />
             <span>Rs. {total}</span>
           </button>
         </div>

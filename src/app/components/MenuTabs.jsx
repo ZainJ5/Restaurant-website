@@ -6,7 +6,6 @@ export default function MenuTabs() {
   const [subcategories, setSubcategories] = useState([]);
   const { activeCategory, activeSubcategory, setActiveCategory, setActiveSubcategory } = useMenuStore();
 
-  // Utility: extract an ID string from an object field.
   const getId = (idField) => {
     if (typeof idField === 'object' && idField !== null) {
       if (idField.$oid) return idField.$oid;
@@ -15,11 +14,9 @@ export default function MenuTabs() {
     return idField;
   };
 
-  // Fetch categories and subcategories only once on mount.
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch categories.
         const categoriesRes = await fetch('/api/categories');
         const categoriesData = await categoriesRes.json();
         setCategories(categoriesData);
@@ -27,7 +24,6 @@ export default function MenuTabs() {
           const firstCatId = getId(categoriesData[0]._id);
           setActiveCategory(firstCatId);
         }
-        // Fetch subcategories.
         const subcategoriesRes = await fetch('/api/subcategories');
         const subcategoriesData = await subcategoriesRes.json();
         setSubcategories(subcategoriesData);
@@ -36,9 +32,8 @@ export default function MenuTabs() {
       }
     }
     fetchData();
-  }, []); // Run only once
+  }, []);
 
-  // Memoize filtered subcategories for the active category.
   const filteredSubcategories = useMemo(() => {
     return subcategories.filter((sub) => {
       let subCatId;
@@ -53,7 +48,6 @@ export default function MenuTabs() {
     });
   }, [activeCategory, subcategories]);
 
-  // Update active subcategory when the active category changes.
   useEffect(() => {
     if (filteredSubcategories.length > 0) {
       const firstSubId = getId(filteredSubcategories[0]._id);
@@ -65,11 +59,21 @@ export default function MenuTabs() {
 
   return (
     <>
-      {/* Category Tabs */}
       <div className="bg-red-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative flex items-center overflow-x-auto py-3 scrollbar-hide">
-            <div className="flex items-center gap-3 mx-auto">
+          <div
+            className="relative flex items-center overflow-x-auto py-3"
+            style={{
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none', 
+            }}
+          >
+            <style jsx>{`
+              .no-scroll::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            <div className="flex items-center gap-3 mx-auto no-scroll">
               <button className="text-white shrink-0 focus:outline-none p-1">
                 <svg
                   className="w-5 h-5 sm:w-6 sm:h-6"
@@ -101,7 +105,6 @@ export default function MenuTabs() {
           </div>
         </div>
       </div>
-      {/* Subcategory Tabs */}
       {filteredSubcategories.length > 0 && (
         <div className="bg-white py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
