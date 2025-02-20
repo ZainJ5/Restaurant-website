@@ -2,9 +2,8 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { FaShoppingCart, FaCreditCard } from 'react-icons/fa'
-import { useCart } from '../context/CartContext'
-import CartDrawer from './Cart'  
-
+import { useCartStore } from '../../store/cart' 
+import CartDrawer from './Cart'
 
 function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
   const [styles, setStyles] = useState({
@@ -64,7 +63,7 @@ function BannerSwiper() {
 
 export default function Hero() {
   const images = ['/hero.jpg', '/hero-2.jpg', '/hero-3.jpg']
-  const { cart } = useCart()
+  const { items, total } = useCartStore()
 
   const [sliderState, setSliderState] = useState({
     current: 0,
@@ -116,16 +115,31 @@ export default function Hero() {
           />
         </div>
 
-        <div className="absolute top-4 right-4 z-10">
+        <div
+          className="
+            z-50
+            fixed bottom-0 left-0 w-full
+            flex justify-center
+            sm:absolute sm:bottom-auto sm:left-auto sm:top-4 sm:right-4 sm:w-auto
+          "
+        >
           <button
             onClick={() => setIsCartOpen(true)}
-            className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-md flex items-center shadow-lg text-xs sm:text-sm md:text-base"
+            className="
+              w-full sm:w-auto
+              bg-red-500 text-white 
+              px-4 py-3 
+              flex items-center justify-center 
+              shadow-lg 
+              text-xs sm:text-sm md:text-base 
+              rounded-md
+            "
           >
-            <FaShoppingCart className="mr-1 text-xs sm:text-sm md:text-base" />
-            <span>{cart.items.length}</span>
-            <div className="mx-2 sm:mx-3 h-4 sm:h-5 w-px bg-white"></div>
-            <FaCreditCard className="mr-1 text-xs sm:text-sm md:text-base" />
-            <span>Rs. {cart.total}</span>
+            <FaShoppingCart className="mr-2 text-xs sm:text-sm md:text-base" />
+            <span>{items.length}</span>
+            <div className="mx-3 h-4 sm:h-5 w-px bg-white"></div>
+            <FaCreditCard className="mr-2 text-xs sm:text-sm md:text-base" />
+            <span>Rs. {total}</span>
           </button>
         </div>
 

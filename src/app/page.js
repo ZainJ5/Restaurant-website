@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { CartProvider } from '../app/context/CartContext'
 import Navbar from '../app/components/NavBar'
 import Hero from '../app/components/Hero'
 import MenuTabs from '../app/components/MenuTabs'
@@ -16,7 +15,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <CartProvider>
+    <>
       <main className="min-h-screen bg-white text-black">
         <Hero />
         <Navbar />
@@ -37,6 +36,6 @@ export default function Home() {
         pauseOnHover
         theme="colored"
       />
-    </CartProvider>
+    </>
   )
 }

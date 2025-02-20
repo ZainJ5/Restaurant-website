@@ -1,3 +1,4 @@
+// /app/models/Order.js
 import mongoose from "mongoose";
 
 const OrderSchema = new mongoose.Schema(
@@ -23,6 +24,9 @@ const OrderSchema = new mongoose.Schema(
     discount: { type: Number, required: true },
     total: { type: Number, required: true },
     promoCode: { type: String },
+    isGift: { type: Boolean, default: false },
+    giftMessage: { type: String },
+    isCompleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

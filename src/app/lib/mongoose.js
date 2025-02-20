@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const connectDB = async () => {
   try {
     console.log("MongoDB:", mongoose);
-    const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/resturant";
+    const mongoURI = process.env.MONGODB_URI;
     await mongoose.connect(mongoURI);
     console.log("Connected to Database");
   } catch (error) {
@@ -16,3 +16,4 @@ const connectDB = async () => {
 };
 
 export default connectDB;
+// || "mongodb://localhost:27017/resturant"
