@@ -78,16 +78,20 @@ export default function CartDrawer({ isOpen, onClose }) {
                 <div key={`${item.id}-${index}`} className="p-4 group hover:bg-gray-50 transition-colors">
                   <div className="flex gap-4">
                     <div className="h-24 w-24 rounded-xl overflow-hidden bg-gradient-to-br from-red-50 to-red-100 flex-shrink-0 relative shadow-sm">
-                      {item.image && (
+                      {item.imageUrl && item.imageUrl !== '' ? (
                         <Image 
-                          src={item.image} 
+                          src={item.imageUrl} 
                           alt={item.title} 
                           fill 
-                          className="object-cover" 
+                          style={{ objectFit: 'cover' }}
                           loading="lazy" 
                           placeholder="blur" 
                           blurDataURL="/placeholder.svg" 
                         />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500 text-sm">No Image</span>
+                        </div>
                       )}
                     </div>
                     <div className="flex-1">
