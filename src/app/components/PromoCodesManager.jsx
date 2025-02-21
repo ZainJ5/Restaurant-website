@@ -80,7 +80,7 @@ export default function PromoCodesManager() {
         />
         <input
           type="number"
-          placeholder="Discount (%)"
+          placeholder="Discount (Rs)"
           value={discount}
           onChange={(e) => setDiscount(Number(e.target.value))}
           className="w-32 p-2 border border-gray-300 rounded"
