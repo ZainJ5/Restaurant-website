@@ -1,3 +1,4 @@
+// models/FoodItem.js
 import mongoose from "mongoose";
 
 const VariationSchema = new mongoose.Schema(
@@ -5,14 +6,14 @@ const VariationSchema = new mongoose.Schema(
     name: { type: String, required: true },
     price: { type: Number, required: true },
   },
-  { _id: false } 
+  { _id: false }
 );
 
 const FoodItemSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
-    price: { type: Number, required: false },
+    price: { type: Number, required: false }, // Marked as optional
     imageUrl: { type: String },
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,5 +35,8 @@ const FoodItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.FoodItem ||
-  mongoose.model("FoodItem", FoodItemSchema);
+if (mongoose.models.FoodItem) {
+  delete mongoose.models.FoodItem;
+}
+
+export default mongoose.model("FoodItem", FoodItemSchema);
