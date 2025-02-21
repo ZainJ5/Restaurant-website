@@ -12,7 +12,7 @@ const FoodItemSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
-    price: { type: Number, required: true },
+    price: { type: Number, required: false },
     imageUrl: { type: String },
     category: {
       type: mongoose.Schema.Types.ObjectId,
