@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/app/lib/mongoose";
 import FoodItem from "@/app/models/FoodItem";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Category from "@/app/models/Category";
 import { storage } from "@/app/lib/firebase";
 
 export async function POST(request) {
