@@ -1,6 +1,4 @@
-'use client';
-
-
+"use client";
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -48,12 +46,20 @@ export default function SubcategoryList() {
   return (
     <div className="space-y-4">
       {subcategories.map((sub) => (
-        <div key={sub._id} className="flex items-center justify-between border p-4 rounded">
+        <div
+          key={sub._id}
+          className="flex items-center justify-between border p-4 rounded"
+        >
           <div>
             <span className="font-bold">{sub.name}</span>
             {sub.category && typeof sub.category === "object" && (
               <span className="ml-2 text-sm text-gray-600">
                 (Category: {sub.category.name})
+              </span>
+            )}
+            {sub.branch && typeof sub.branch === "object" && (
+              <span className="ml-2 text-sm text-gray-600">
+                (Branch: {sub.branch.name})
               </span>
             )}
           </div>

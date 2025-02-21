@@ -1,21 +1,24 @@
-'use client'
-import { useState } from 'react'
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+"use client";
+import { useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import Navbar from '../app/components/NavBar'
-import Hero from '../app/components/Hero'
-import MenuTabs from '../app/components/MenuTabs'
-import SuperDeals from '../app/components/SuperDeals'
-import Footer from '../app/components/Footer'
-import Banner from '../app/components/Banner'
-import SearchBar from './components/SearchBar'
+import Navbar from "../app/components/NavBar";
+import Hero from "../app/components/Hero";
+import MenuTabs from "../app/components/MenuTabs";
+import SuperDeals from "../app/components/SuperDeals";
+import Footer from "../app/components/Footer";
+import Banner from "../app/components/Banner";
+import SearchBar from "./components/SearchBar";
+import DeliveryPickupModal from "./components/DeliveryPickupModal";
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <>
+      <DeliveryPickupModal />
+
       <main className="min-h-screen bg-white text-black">
         <Hero />
         <Navbar />
@@ -25,6 +28,7 @@ export default function Home() {
         <SuperDeals searchQuery={searchQuery} />
         <Footer />
       </main>
+
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -37,5 +41,5 @@ export default function Home() {
         theme="colored"
       />
     </>
-  )
+  );
 }

@@ -1,5 +1,11 @@
-// /app/models/Order.js
 import mongoose from "mongoose";
+
+const OrderItemSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  type: { type: String }
+});
 
 const OrderSchema = new mongoose.Schema(
   {
@@ -12,13 +18,7 @@ const OrderSchema = new mongoose.Schema(
     paymentInstructions: { type: String },
     paymentMethod: { type: String, enum: ["cod", "online"], default: "cod" },
     changeRequest: { type: String },
-    items: [
-      {
-        id: { type: Number },
-        name: { type: String },
-        price: { type: Number },
-      },
-    ],
+    items: [OrderItemSchema],
     subtotal: { type: Number, required: true },
     tax: { type: Number, required: true },
     discount: { type: Number, required: true },
@@ -27,6 +27,12 @@ const OrderSchema = new mongoose.Schema(
     isGift: { type: Boolean, default: false },
     giftMessage: { type: String },
     isCompleted: { type: Boolean, default: false },
+    orderType: { type: String, enum: ["delivery", "pickup"], default: "delivery" },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true,
+    },
   },
   { timestamps: true }
 );

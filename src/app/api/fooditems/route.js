@@ -7,7 +7,6 @@ import { storage } from "@/app/lib/firebase";
 export async function POST(request) {
   try {
     await connectDB();
-
     const formData = await request.formData();
 
     const title = formData.get("title");
@@ -15,31 +14,47 @@ export async function POST(request) {
     const price = formData.get("price");
     const category = formData.get("category");
     const subcategory = formData.get("subcategory");
+    const branch = formData.get("branch");
+
+    let variationsParsed = [];
+    const variations = formData.get("variations");
+    if (variations) {
+      try {
+        variationsParsed = JSON.parse(variations);
+      } catch (err) {
+        console.error("Error parsing variations:", err);
+      }
+    }
 
     let imageUrl = null;
     const file = formData.get("foodImage");
     if (file && file.size > 0) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-
       const dateTime = Date.now();
       const fileName = `foodItems/${dateTime}-${file.name}`;
       const storageRef = ref(storage, fileName);
       const metadata = { contentType: file.type };
 
       await uploadBytes(storageRef, buffer, metadata);
-
       imageUrl = await getDownloadURL(storageRef);
     }
 
-    const foodItem = await FoodItem.create({
+    const foodItemData = {
       title,
       description,
-      price: Number(price),
       imageUrl,
       category,
       subcategory,
-    });
+      branch,
+      variations: variationsParsed,
+    };
+
+    if (!variationsParsed.length) {
+      foodItemData.price = Number(price);
+    }
+
+    const foodItem = await FoodItem.create(foodItemData);
 
     return NextResponse.json(foodItem, { status: 201 });
   } catch (err) {
@@ -51,16 +66,14 @@ export async function POST(request) {
   }
 }
 
-
-
-
-
-
-
 export async function GET() {
   try {
     await connectDB();
-    const items = await FoodItem.find({});
+    const items = await FoodItem.find({})
+      .populate("branch")
+      .populate("category")
+      .populate("subcategory");
+
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error("Error fetching items:", error);

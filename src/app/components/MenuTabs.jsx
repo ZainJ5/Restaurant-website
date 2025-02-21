@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useMenuStore } from '../../store/menu';
+import { useBranchStore } from '../../store/branchStore';
 
 export default function MenuTabs() {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const { activeCategory, activeSubcategory, setActiveCategory, setActiveSubcategory } = useMenuStore();
+  const { branch } = useBranchStore(); 
 
   const getId = (idField) => {
     if (typeof idField === 'object' && idField !== null) {
@@ -17,42 +19,77 @@ export default function MenuTabs() {
   useEffect(() => {
     async function fetchData() {
       try {
+        console.log('Fetching categories. Branch:', branch);
         const categoriesRes = await fetch('/api/categories');
         const categoriesData = await categoriesRes.json();
-        setCategories(categoriesData);
-        if (categoriesData.length > 0 && !activeCategory) {
-          const firstCatId = getId(categoriesData[0]._id);
+        console.log('Fetched categories:', categoriesData);
+
+        const filteredCategoriesData = categoriesData.filter((cat) => {
+          if (cat.branch) {
+            const catBranch = typeof cat.branch === 'object' ? getId(cat.branch) : cat.branch;
+            console.log(`Category "${cat.name}" branch:`, catBranch, 'Comparing with branch:', getId(branch));
+            return catBranch === getId(branch);
+          }
+          console.log(`Category "${cat.name}" has no branch. Excluding.`);
+          return false;
+        });
+        console.log('Filtered categories:', filteredCategoriesData);
+        setCategories(filteredCategoriesData);
+        if (filteredCategoriesData.length > 0) {
+          const firstCatId = getId(filteredCategoriesData[0]._id);
+          console.log('Automatically setting active category to first button:', firstCatId);
           setActiveCategory(firstCatId);
+        } else {
+          setActiveCategory(null);
         }
+
+        console.log('Fetching subcategories. Branch:', branch);
         const subcategoriesRes = await fetch('/api/subcategories');
         const subcategoriesData = await subcategoriesRes.json();
-        setSubcategories(subcategoriesData);
+        console.log('Fetched subcategories:', subcategoriesData);
+
+        const filteredSubcategoriesData = subcategoriesData.filter((sub) => {
+          if (sub.branch) {
+            const subBranch = typeof sub.branch === 'object' ? getId(sub.branch) : sub.branch;
+            console.log(`Subcategory "${sub.name}" branch:`, subBranch, 'Comparing with branch:', getId(branch));
+            return subBranch === getId(branch);
+          }
+          console.log(`Subcategory "${sub.name}" has no branch. Excluding.`);
+          return false;
+        });
+        console.log('Filtered subcategories by branch:', filteredSubcategoriesData);
+        setSubcategories(filteredSubcategoriesData);
       } catch (error) {
         console.error("Error fetching categories/subcategories:", error);
       }
     }
-    fetchData();
-  }, []);
+    if (branch) {
+      fetchData();
+    }
+  }, [branch, setActiveCategory]);
 
   const filteredSubcategories = useMemo(() => {
-    return subcategories.filter((sub) => {
-      let subCatId;
-      if (typeof sub.category === 'object' && sub.category !== null) {
-        if (sub.category.$oid) subCatId = sub.category.$oid;
-        else if (sub.category._id) subCatId = getId(sub.category._id);
-        else subCatId = null;
+    const filtered = subcategories.filter((sub) => {
+      let subCatId = null;
+      if (sub.category && typeof sub.category === 'object') {
+        subCatId = getId(sub.category);
       } else {
         subCatId = sub.category;
       }
+      console.log(`Subcategory "${sub.name}" category id:`, subCatId, ' activeCategory:', activeCategory);
       return subCatId === activeCategory;
     });
+    console.log('Subcategories after filtering by active category:', filtered);
+    return filtered;
   }, [activeCategory, subcategories]);
 
   useEffect(() => {
     if (filteredSubcategories.length > 0) {
       const firstSubId = getId(filteredSubcategories[0]._id);
+      console.log('Setting active subcategory to:', firstSubId);
       setActiveSubcategory(firstSubId);
     } else {
+      console.log('No filtered subcategories found. Setting active subcategory to null.');
       setActiveSubcategory(null);
     }
   }, [filteredSubcategories, setActiveSubcategory]);
@@ -64,8 +101,8 @@ export default function MenuTabs() {
           <div
             className="relative flex items-center overflow-x-auto py-3"
             style={{
-              scrollbarWidth: 'none', 
-              msOverflowStyle: 'none', 
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
             }}
           >
             <style jsx>{`
@@ -90,7 +127,10 @@ export default function MenuTabs() {
                 return (
                   <button
                     key={catId}
-                    onClick={() => setActiveCategory(catId)}
+                    onClick={() => {
+                      console.log('User selected active category:', catId);
+                      setActiveCategory(catId);
+                    }}
                     className={
                       activeCategory === catId
                         ? 'bg-white text-black font-semibold px-4 py-1 rounded-lg whitespace-nowrap text-sm sm:text-base shrink-0 shadow-sm'
@@ -114,7 +154,10 @@ export default function MenuTabs() {
                 return (
                   <button
                     key={subId}
-                    onClick={() => setActiveSubcategory(subId)}
+                    onClick={() => {
+                      console.log('User selected active subcategory:', subId);
+                      setActiveSubcategory(subId);
+                    }}
                     className={`${
                       activeSubcategory === subId
                         ? 'bg-black text-white hover:bg-gray-800'

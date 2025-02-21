@@ -1,46 +1,130 @@
-'use client'
-import { useState } from 'react'
-import { FaCreditCard, FaMoneyBill, FaGift } from 'react-icons/fa'
-import { toast } from 'react-toastify'
-
-import { useCartStore } from '../../store/cart'
+"use client";
+import { useState, useEffect } from "react";
+import { FaCreditCard, FaMoneyBill, FaGift } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { useOrderTypeStore } from "../../store/orderTypeStore";
+import { useCartStore } from "../../store/cart";
+import { useBranchStore } from "../../store/branchStore";
+import DeliveryPickupModal from "../components/DeliveryPickupModal";
+import { areasOfLahore } from "../lib/areasOfLahore";
 
 export default function CheckoutPage() {
-  const [title, setTitle] = useState('Mr.')
-  const [fullName, setFullName] = useState('')
-  const [mobileNumber, setMobileNumber] = useState('')
-  const [alternateMobile, setAlternateMobile] = useState('')
-  const [deliveryAddress, setDeliveryAddress] = useState('')
-  const [nearestLandmark, setNearestLandmark] = useState('')
-  const [email, setEmail] = useState('')
-  const [paymentInstructions, setPaymentInstructions] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('cod')
-  const [changeRequest, setChangeRequest] = useState('')
-  const [promoCode, setPromoCode] = useState('')
-  const [isGift, setIsGift] = useState(false)
-  const [giftMessage, setGiftMessage] = useState('')
+  const [title, setTitle] = useState("Mr.");
+  const [fullName, setFullName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [alternateMobile, setAlternateMobile] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [nearestLandmark, setNearestLandmark] = useState("");
+  const [email, setEmail] = useState("");
+  const [paymentInstructions, setPaymentInstructions] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [changeRequest, setChangeRequest] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [isGift, setIsGift] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedArea, setSelectedArea] = useState(null);
+  const [promoCodes, setPromoCodes] = useState([]);
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const { orderType } = useOrderTypeStore();
+  const { branch } = useBranchStore();
+  const { items, total, clearCart } = useCartStore();
+  const subtotal = total;
+  const tax = 0;
+  const deliveryFee = selectedArea ? selectedArea.fee : 0;
+  const grandTotal = subtotal + tax + deliveryFee - appliedDiscount;
 
-  const { items, total, clearCart } = useCartStore()
-  const subtotal = total
-  const tax = Math.round(subtotal * 0.18)
-  const deliveryFee = 100
-  const discount = 112
-  const grandTotal = subtotal + tax + deliveryFee - discount
+  useEffect(() => {
+    async function fetchPromoCodes() {
+      try {
+        const res = await fetch("/api/promocodes");
+        if (res.ok) {
+          const data = await res.json();
+          setPromoCodes(data);
+        } else {
+          toast.error("Failed to fetch promo codes. Please try again later.", {
+            style: { background: "#dc2626", color: "#ffffff" },
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching promo codes:", error);
+        toast.error("Error fetching promo codes. Please try again later.", {
+          style: { background: "#dc2626", color: "#ffffff" },
+        });
+      }
+    }
+    fetchPromoCodes();
+  }, []);
+
+  const handleApplyPromo = () => {
+    if (!promoCode.trim()) {
+      toast.error("Please enter a promo code.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    const found = promoCodes.find(
+      (p) => p.code.toLowerCase() === promoCode.trim().toLowerCase()
+    );
+    if (found && found.discount > 0) {
+      setAppliedDiscount(found.discount);
+      toast.success("Promo code applied successfully!", {
+        style: { background: "#16a34a", color: "#ffffff" },
+      });
+    } else {
+      setAppliedDiscount(0);
+      toast.error("Invalid promo code. Please try a different code.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+    }
+  };
 
   const handlePlaceOrder = async () => {
+    if (items.length === 0) {
+      toast.error("Your cart is empty. Please add items before placing an order.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    if (!fullName.trim() || !mobileNumber.trim() || !deliveryAddress.trim()) {
+      toast.error("Please fill in all required fields.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    if (!branch || !orderType) {
+      toast.error("Please select your branch and order type.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    if (!selectedArea) {
+      toast.error("Please select your delivery area.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    if (grandTotal < 0) {
+      toast.error("The total amount cannot be negative. Please review your order.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    setIsSubmitting(true);
     try {
       const orderItems = items.map((item) => ({
         id: item.id,
-        name: item.title, 
+        name: item.title,
         price: item.price,
         quantity: item.quantity,
-      }))
-
+        type: item.type,
+      }));
+      const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
       const orderData = {
         fullName,
         mobileNumber,
         alternateMobile,
-        deliveryAddress,
+        deliveryAddress: completeAddress,
         nearestLandmark,
         email,
         paymentInstructions,
@@ -49,339 +133,360 @@ export default function CheckoutPage() {
         items: orderItems,
         subtotal,
         tax,
-        discount,
+        discount: appliedDiscount,
         total: grandTotal,
         promoCode,
         isGift,
         giftMessage,
-      }
-
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
+        orderType,
+        branch: branch?._id,
+        area: selectedArea.name,
+      };
+      const response = await fetch("/api/checkout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(orderData),
-      })
-
+      });
       if (!response.ok) {
-        throw new Error('Failed to place order')
+        throw new Error("Failed to place order");
       }
-
-      const data = await response.json()
-      console.log('Order placed successfully:', data)
-
-      clearCart()
-      resetFormFields()
-
-      toast.success('Order placed successfully!', {
-        style: { background: '#16a34a', color: '#ffffff' },
-      })
+      const data = await response.json();
+      console.log("Order placed successfully:", data);
+      clearCart();
+      resetFormFields();
+      toast.success("Your order has been placed successfully!", {
+        style: { background: "#16a34a", color: "#ffffff" },
+      });
     } catch (error) {
-      console.error(error)
-      toast.error('Error placing order', {
-        style: { background: '#dc2626', color: '#ffffff' },
-      })
+      console.error(error);
+      toast.error("An error occurred while placing your order. Please try again later.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const resetFormFields = () => {
-    setTitle('Mr.')
-    setFullName('')
-    setMobileNumber('')
-    setAlternateMobile('')
-    setDeliveryAddress('')
-    setNearestLandmark('')
-    setEmail('')
-    setPaymentInstructions('')
-    setPaymentMethod('cod')
-    setChangeRequest('')
-    setPromoCode('')
-    setIsGift(false)
-    setGiftMessage('')
-  }
+    setTitle("Mr.");
+    setFullName("");
+    setMobileNumber("");
+    setAlternateMobile("");
+    setDeliveryAddress("");
+    setNearestLandmark("");
+    setEmail("");
+    setPaymentInstructions("");
+    setPaymentMethod("cod");
+    setChangeRequest("");
+    setPromoCode("");
+    setIsGift(false);
+    setGiftMessage("");
+    setAppliedDiscount(0);
+    setSelectedArea(null);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-center mb-8">
-          <img src="/Logo.jpeg" alt="Logo" className="h-24 sm:h-32" />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-          <div className="lg:col-span-2 bg-white rounded-lg p-4 sm:p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Checkout</h1>
-                <p className="text-sm sm:text-base text-gray-600">
-                  This is a Delivery Order <span className="text-red-600">🚚</span>
-                  <br />
-                  Just a last step, please enter your details:
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsGift(!isGift)}
-                className="inline-flex items-center justify-center px-4 py-2 border-2 border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors text-sm sm:text-base w-full sm:w-auto"
-              >
-                <FaGift className="mr-2" />
-                <span>{isGift ? 'Remove Gift Option' : 'Send as a Gift'}</span>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div className="sm:col-span-1">
-                  <label className="block text-sm text-gray-700 mb-1">Title</label>
-                  <select
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                  >
-                    <option>Mr.</option>
-                    <option>Mrs.</option>
-                    <option>Ms.</option>
-                  </select>
+    <>
+      {(!branch || !orderType) && <DeliveryPickupModal />}
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-center mb-8">
+            <img src="/Logo.jpeg" alt="Logo" className="h-24 sm:h-32" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+            <div className="lg:col-span-2 bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                    Checkout
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600">
+                    This is a Delivery Order <span className="text-red-600">🚚</span>
+                    <br />
+                    Just a last step, please enter your details:
+                  </p>
                 </div>
-                <div className="sm:col-span-3">
-                  <label className="block text-sm text-gray-700 mb-1">
-                    Full Name <span className="text-red-500">*Required</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="Full Name"
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsGift(!isGift)}
+                  className="inline-flex items-center justify-center px-4 py-2 border-2 border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors text-sm sm:text-base w-full sm:w-auto"
+                >
+                  <FaGift className="mr-2" />
+                  <span>{isGift ? "Remove Gift Option" : "Send as a Gift"}</span>
+                </button>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  <div className="sm:col-span-1">
+                    <label className="block text-sm text-gray-700 mb-1">Title</label>
+                    <select
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                    >
+                      <option>Mr.</option>
+                      <option>Mrs.</option>
+                      <option>Ms.</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Full Name <span className="text-red-500">*Required</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      placeholder="Full Name"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Mobile Number <span className="text-red-500">*Required</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      placeholder="03xx-xxxxxxx"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Alternate Mobile Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={alternateMobile}
+                      onChange={(e) => setAlternateMobile(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      placeholder="03xx-xxxxxxx"
+                    />
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm text-gray-700 mb-1">
-                    Mobile Number <span className="text-red-500">*Required</span>
+                    Delivery Address <span className="text-red-500">*Required</span>
                   </label>
-                  <input
-                    type="tel"
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="03xx-xxxxxxx"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Alternate Mobile Number</label>
-                  <input
-                    type="tel"
-                    value={alternateMobile}
-                    onChange={(e) => setAlternateMobile(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="03xx-xxxxxxx"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">
-                  Delivery Address <span className="text-red-500">*Required</span>
-                </label>
-                <div className="flex flex-col sm:flex-row">
                   <input
                     type="text"
                     value={deliveryAddress}
                     onChange={(e) => setDeliveryAddress(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-md sm:rounded-r-none mb-2 sm:mb-0"
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
                     placeholder="Enter your complete address"
                   />
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-100 border border-gray-200 rounded-md sm:rounded-l-none sm:border-l-0 text-gray-600"
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">
+                    Select Area <span className="text-red-500">*Required</span>
+                  </label>
+                  <select
+                    value={selectedArea ? selectedArea.name : ""}
+                    onChange={(e) => {
+                      const selected = areasOfLahore.find(
+                        (area) => area.name === e.target.value
+                      );
+                      setSelectedArea(selected);
+                    }}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
                   >
-                    Bahria ...
-                  </button>
+                    <option value="">Select an area</option>
+                    {areasOfLahore.map((area) => (
+                      <option key={area.name} value={area.name}>
+                        {area.name} (Fee: Rs. {area.fee})
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Nearest Landmark</label>
-                  <input
-                    type="text"
-                    value={nearestLandmark}
-                    onChange={(e) => setNearestLandmark(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="any famous place nearby"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="Enter your email"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Payment Instructions</label>
-                <textarea
-                  value={paymentInstructions}
-                  onChange={(e) => setPaymentInstructions(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                  placeholder="Any notes or instructions about payment?"
-                  rows={3}
-                />
-              </div>
-
-              {isGift && (
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Gift Message</label>
-                  <textarea
-                    value={giftMessage}
-                    onChange={(e) => setGiftMessage(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="Enter a gift message"
-                    rows={3}
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">Payment Information</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('cod')}
-                    className={`p-4 border rounded-md flex items-center justify-center space-x-2 ${
-                      paymentMethod === 'cod'
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200'
-                    }`}
-                  >
-                    <FaMoneyBill className="text-green-500" />
-                    <span>Cash on Delivery</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('online')}
-                    className={`p-4 border rounded-md flex items-center justify-center space-x-2 ${
-                      paymentMethod === 'online'
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200'
-                    }`}
-                  >
-                    <FaCreditCard className="text-blue-500" />
-                    <span>Online Payment</span>
-                  </button>
-                </div>
-              </div>
-
-              {paymentMethod === 'cod' && (
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Change Request</label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-200 rounded-l-md bg-gray-50">
-                      Rs.
-                    </span>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Nearest Landmark
+                    </label>
                     <input
                       type="text"
-                      value={changeRequest}
-                      onChange={(e) => setChangeRequest(e.target.value)}
-                      className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-r-md"
-                      placeholder="500"
+                      value={nearestLandmark}
+                      onChange={(e) => setNearestLandmark(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      placeholder="any famous place nearby"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      placeholder="Enter your email"
                     />
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-
-          <div className="sticky top-8 bg-white rounded-lg p-4 sm:p-6 shadow-sm h-fit">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <h2 className="text-lg sm:text-xl font-semibold">Your Order</h2>
-              </div>
-              <span className="text-lg sm:text-xl font-semibold">Rs. {subtotal}</span>
-            </div>
-
-            {items.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {items.map((item, index) => (
-                  <div key={`${item.id}-${index}`} className="flex justify-between text-sm text-gray-700">
-                    <span>
-                      {item.title} x {item.quantity}
-                    </span>
-                    <span>Rs. {(item.price * item.quantity).toLocaleString()}</span>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">
+                    Payment Instructions
+                  </label>
+                  <textarea
+                    value={paymentInstructions}
+                    onChange={(e) => setPaymentInstructions(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                    placeholder="Any notes or instructions about payment?"
+                    rows={3}
+                  />
+                </div>
+                {isGift && (
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Gift Message
+                    </label>
+                    <textarea
+                      value={giftMessage}
+                      onChange={(e) => setGiftMessage(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      placeholder="Enter a gift message"
+                      rows={3}
+                    />
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="space-y-4 text-sm sm:text-base text-gray-600">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>Rs. {subtotal}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax 18%</span>
-                <span>Rs. {tax}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Delivery Fee</span>
-                <span>Rs. {deliveryFee}</span>
-              </div>
-              <div className="flex justify-between text-yellow-500">
-                <span>Discount</span>
-                <span>Rs. {discount}</span>
+                )}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Payment Information
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("cod")}
+                      className={`p-4 border rounded-md flex items-center justify-center space-x-2 ${
+                        paymentMethod === "cod"
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <FaMoneyBill className="text-green-500" />
+                      <span>Cash on Delivery</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("online")}
+                      className={`p-4 border rounded-md flex items-center justify-center space-x-2 ${
+                        paymentMethod === "online"
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <FaCreditCard className="text-blue-500" />
+                      <span>Online Payment</span>
+                    </button>
+                  </div>
+                </div>
+                {paymentMethod === "cod" && (
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">
+                      Change Request
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-200 rounded-l-md bg-gray-50">
+                        Rs.
+                      </span>
+                      <input
+                        type="text"
+                        value={changeRequest}
+                        onChange={(e) => setChangeRequest(e.target.value)}
+                        className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-r-md"
+                        placeholder="500"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between text-base sm:text-lg font-semibold">
-                <span>Grand Total</span>
-                <span>Rs. {grandTotal}</span>
+            <div className="sticky top-8 bg-white rounded-lg p-4 sm:p-6 shadow-sm h-fit">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <h2 className="text-lg sm:text-xl font-semibold">Your Order</h2>
+                </div>
+                <span className="text-lg sm:text-xl font-semibold">Rs. {subtotal}</span>
               </div>
-            </div>
-
-            <div className="mt-6">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-l-md"
-                  placeholder="Enter Voucher / Promo code"
-                />
+              {items.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {items.map((item, index) => (
+                    <div key={`${item.id}-${index}`} className="flex justify-between text-sm text-gray-700">
+                      <span>
+                        {item.title} x {item.quantity}
+                      </span>
+                      <span>Rs. {(item.price * item.quantity).toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="space-y-4 text-sm sm:text-base text-gray-600">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rs. {subtotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax (0%)</span>
+                  <span>Rs. {tax}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Fee</span>
+                  <span>Rs. {deliveryFee}</span>
+                </div>
+                <div className="flex justify-between text-yellow-500">
+                  <span>Discount</span>
+                  <span>Rs. {appliedDiscount}</span>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex justify-between text-base sm:text-lg font-semibold">
+                  <span>Grand Total</span>
+                  <span>Rs. {grandTotal}</span>
+                </div>
+              </div>
+              <div className="mt-6">
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-l-md"
+                    placeholder="Enter Voucher / Promo code"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-r-md hover:bg-gray-300 transition-colors"
+                  >
+                    Apply
+                  </button>
+                </div>
                 <button
                   type="button"
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-r-md hover:bg-gray-300 transition-colors"
+                  onClick={handlePlaceOrder}
+                  disabled={isSubmitting}
+                  className="w-full mt-6 bg-red-600 text-white py-3 rounded-md hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
                 >
-                  Apply
+                  {isSubmitting ? "Placing Order..." : "Place Order"}
                 </button>
+                <a
+                  href="/"
+                  className="block mt-4 text-center text-blue-500 hover:underline text-sm sm:text-base"
+                >
+                  ← continue to add more items
+                </a>
               </div>
-
-              <button
-                type="button"
-                onClick={handlePlaceOrder}
-                className="w-full mt-6 bg-red-600 text-white py-3 rounded-md hover:bg-red-700 transition-colors font-medium"
-              >
-                Place Order
-              </button>
-
-              <a
-                href="/"
-                className="block mt-4 text-center text-blue-500 hover:underline text-sm sm:text-base"
-              >
-                ← continue to add more items
-              </a>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    </>
+  );
 }

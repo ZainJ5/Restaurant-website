@@ -1,6 +1,4 @@
-'use client';
-
-
+"use client";
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -14,6 +12,7 @@ export default function CategoryList() {
     try {
       const res = await fetch("/api/categories");
       const data = await res.json();
+      console.log("Fetched categories:", data); //
       setCategories(data);
     } catch (error) {
       toast.error("Error fetching categories");
@@ -49,7 +48,14 @@ export default function CategoryList() {
     <div className="space-y-4">
       {categories.map((cat) => (
         <div key={cat._id} className="flex items-center justify-between border p-4 rounded">
-          <span className="font-bold">{cat.name}</span>
+          <div>
+            <span className="font-bold">{cat.name}</span>
+            {cat.branch && typeof cat.branch === "object" && (
+              <span className="ml-2 text-sm text-gray-600">
+                (Branch: {cat.branch.name})
+              </span>
+            )}
+          </div>
           <button
             onClick={() => deleteCategory(cat._id)}
             className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"

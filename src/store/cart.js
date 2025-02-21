@@ -8,36 +8,44 @@ export const useCartStore = create((set, get) => ({
   addToCart: (deal) =>
     set((state) => {
       const index = state.items.findIndex(
-        (item) =>
-          item.id === deal.id &&
-          JSON.stringify(item.options) === JSON.stringify(deal.options)
+        (item) => item.cartItemId && item.cartItemId === deal.cartItemId
       );
-      const newItems = [...state.items];
-      if (index > -1) {
-        newItems[index] = {
-          ...newItems[index],
-          quantity: newItems[index].quantity + 1,
+      
+      if (index === -1) {
+        return {
+          items: [...state.items, { ...deal, quantity: 1 }],
+          total: state.total + Number(deal.price),
+          itemCount: state.itemCount + 1,
         };
-      } else {
-        newItems.push({ ...deal, quantity: 1 });
       }
+      
+      const newItems = [...state.items];
+      newItems[index] = {
+        ...newItems[index],
+        quantity: newItems[index].quantity + 1,
+      };
+      
       return {
         items: newItems,
-        total: state.total + deal.price,
+        total: state.total + Number(deal.price),
         itemCount: state.itemCount + 1,
       };
     }),
 
   updateItemQuantity: (index, newQuantity) =>
     set((state) => {
-      if (newQuantity < 1) return {};
+      if (newQuantity < 1) {
+        return get().removeFromCart(index);
+      }
+      
       const newItems = [...state.items];
       const oldQuantity = newItems[index].quantity;
-      const priceDifference = (newQuantity - oldQuantity) * newItems[index].price;
+      const priceDifference = (newQuantity - oldQuantity) * Number(newItems[index].price);
       newItems[index] = {
         ...newItems[index],
         quantity: newQuantity,
       };
+      
       return {
         items: newItems,
         total: state.total + priceDifference,
@@ -51,7 +59,7 @@ export const useCartStore = create((set, get) => ({
       const removedItem = newItems.splice(index, 1)[0];
       return {
         items: newItems,
-        total: state.total - removedItem.price * removedItem.quantity,
+        total: state.total - Number(removedItem.price) * removedItem.quantity,
         itemCount: state.itemCount - removedItem.quantity,
       };
     }),

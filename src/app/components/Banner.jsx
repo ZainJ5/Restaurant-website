@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useMenuStore } from '../../store/menu';
 
 export default function Banner() {
   const activeCategory = useMenuStore((state) => state.activeCategory);
-  const [categoryName, setCategoryName] = useState(null);
+  const activeCategoryName = useMenuStore((state) => state.activeCategoryName);
+  const setActiveCategoryName = useMenuStore((state) => state.setActiveCategoryName);
+
+  useEffect(() => {
+    console.log("Active Category Name from store:", activeCategoryName);
+  }, [activeCategoryName]);
 
   const getId = (idField) => {
     if (typeof idField === 'object' && idField !== null) {
@@ -22,41 +27,36 @@ export default function Banner() {
 
           const matchedCategory = categories.find((cat) => {
             const catId = getId(cat._id);
-            return catId === activeCategory;
+            const activeCatId = typeof activeCategory === 'object' ? getId(activeCategory._id) : activeCategory;
+            return catId === activeCatId;
           });
 
-          setCategoryName(matchedCategory ? matchedCategory.name : null);
+          setActiveCategoryName(matchedCategory ? matchedCategory.name : null);
         } catch (error) {
           console.error("Error fetching categories:", error);
-          setCategoryName(null);
+          setActiveCategoryName(null);
         }
       } else {
-        setCategoryName(null);
+        setActiveCategoryName(null);
       }
     }
 
     fetchCategoryName();
-  }, [activeCategory]);
+  }, [activeCategory, setActiveCategoryName]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
-      {categoryName ? (
-        <div className="h-24 sm:h-28 flex items-center justify-center bg-gradient-to-r from-red-800 to-red-600 rounded-md shadow-md">
+      {activeCategoryName ? (
+        <div className="h-16 sm:h-20 flex items-center justify-center bg-gradient-to-r from-red-800 to-red-600 rounded-md shadow-md">
           <h1 className="text-white text-4xl sm:text-5xl font-bold">
-            {categoryName}
+            {activeCategoryName}
           </h1>
         </div>
       ) : (
-        <div className="relative h-24 sm:h-28 rounded-md overflow-hidden shadow-md">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url('/bannar.webp')" }}
-          />
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <span className="text-white text-xl sm:text-2xl font-semibold">
-              Welcome!
-            </span>
-          </div>
+        <div className="h-16 sm:h-20 flex items-center justify-center bg-gray-200 rounded-md shadow-md">
+          <h1 className="text-black text-4xl sm:text-5xl font-bold">
+            Loading...
+          </h1>
         </div>
       )}
     </div>
