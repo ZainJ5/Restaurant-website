@@ -17,15 +17,19 @@ export default function CheckoutPage() {
   const [nearestLandmark, setNearestLandmark] = useState("");
   const [email, setEmail] = useState("");
   const [paymentInstructions, setPaymentInstructions] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [changeRequest, setChangeRequest] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
+  const [changeRequest, setChangeRequest] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
   const [promoCodes, setPromoCodes] = useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [receiptFile, setReceiptFile] = useState(null);
+
+  const [paymentType, setPaymentType] = useState("cod");
+  const [onlineOption, setOnlineOption] = useState(null);
+
   const { orderType } = useOrderTypeStore();
   const { branch } = useBranchStore();
   const { items, total, clearCart } = useCartStore();
@@ -33,6 +37,32 @@ export default function CheckoutPage() {
   const tax = 0;
   const deliveryFee = selectedArea ? selectedArea.fee : 0;
   const grandTotal = subtotal + tax + deliveryFee - appliedDiscount;
+
+  const easypaisaDetails = {
+    title: "EasyPaisa Payment Details",
+    accountNumber: "111222333",
+    accountName: "EasyPaisa Merchant",
+    instructions:
+      "Transfer using the EasyPaisa app and upload a screenshot of your transaction.",
+  };
+
+  const jazzcashDetails = {
+    title: "JazzCash Payment Details",
+    accountNumber: "444555666",
+    accountName: "JazzCash Merchant",
+    instructions:
+      "Pay via JazzCash and upload a screenshot of your payment confirmation.",
+  };
+
+  const bankTransferDetails = {
+    title: "Bank Transfer Details",
+    bankName: "ABC Bank",
+    accountNumber: "1234567890",
+    accountName: "Your Business Name",
+    branch: "Main Branch",
+    instructions:
+      "Transfer the payment to the bank account and upload the transaction receipt.",
+  };
 
   useEffect(() => {
     async function fetchPromoCodes() {
@@ -110,44 +140,66 @@ export default function CheckoutPage() {
       });
       return;
     }
+    if (paymentType === "online") {
+      if (!onlineOption) {
+        toast.error("Please select an online payment option.", {
+          style: { background: "#dc2626", color: "#ffffff" },
+        });
+        return;
+      }
+      if (!receiptFile) {
+        toast.error("Please upload your payment receipt.", {
+          style: { background: "#dc2626", color: "#ffffff" },
+        });
+        return;
+      }
+    }
     setIsSubmitting(true);
+
     try {
       const orderItems = items.map((item) => ({
         id: item.id,
         name: item.title,
         price: item.price,
-        quantity: item.quantity,
         type: item.type,
       }));
       const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
-      const orderData = {
-        fullName,
-        mobileNumber,
-        alternateMobile,
-        deliveryAddress: completeAddress,
-        nearestLandmark,
-        email,
-        paymentInstructions,
-        paymentMethod,
-        changeRequest,
-        items: orderItems,
-        subtotal,
-        tax,
-        discount: appliedDiscount,
-        total: grandTotal,
-        promoCode,
-        isGift,
-        giftMessage,
-        orderType,
-        branch: branch?._id,
-        area: selectedArea.name,
-      };
+
+      const formData = new FormData();
+      formData.append("fullName", fullName);
+      formData.append("mobileNumber", mobileNumber);
+      formData.append("alternateMobile", alternateMobile);
+      formData.append("deliveryAddress", completeAddress);
+      formData.append("nearestLandmark", nearestLandmark);
+      formData.append("email", email);
+      formData.append("paymentInstructions", paymentInstructions);
+      formData.append("paymentMethod", paymentType);
+      formData.append("subtotal", subtotal.toString());
+      formData.append("tax", tax.toString());
+      formData.append("discount", appliedDiscount.toString());
+      formData.append("total", grandTotal.toString());
+      formData.append("promoCode", promoCode);
+      formData.append("isGift", isGift ? "true" : "false");
+      formData.append("giftMessage", giftMessage);
+      formData.append("orderType", orderType);
+      formData.append("branch", branch?._id);
+      formData.append("area", selectedArea.name);
+      formData.append("items", JSON.stringify(orderItems));
+      formData.append("changeRequest", changeRequest);
+
+      if (paymentType === "online") {
+        formData.append("receiptImage", receiptFile);
+        let bankNameField = "";
+        if (onlineOption === "easypaisa") bankNameField = "EasyPaisa";
+        else if (onlineOption === "jazzcash") bankNameField = "JazzCash";
+        else if (onlineOption === "bank_transfer")
+          bankNameField = bankTransferDetails.bankName;
+        formData.append("bankName", bankNameField);
+      }
+
       const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
+        body: formData,
       });
       if (!response.ok) {
         throw new Error("Failed to place order");
@@ -178,13 +230,15 @@ export default function CheckoutPage() {
     setNearestLandmark("");
     setEmail("");
     setPaymentInstructions("");
-    setPaymentMethod("cod");
-    setChangeRequest("");
+    setPaymentType("cod");
+    setOnlineOption(null);
     setPromoCode("");
     setIsGift(false);
     setGiftMessage("");
     setAppliedDiscount(0);
     setSelectedArea(null);
+    setReceiptFile(null);
+    setChangeRequest("");
   };
 
   return (
@@ -210,7 +264,7 @@ export default function CheckoutPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsGift(!isGift)}
+                  onClick={() => {}}
                   className="inline-flex items-center justify-center px-4 py-2 border-2 border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors text-sm sm:text-base w-full sm:w-auto"
                 >
                   <FaGift className="mr-2" />
@@ -314,7 +368,7 @@ export default function CheckoutPage() {
                       value={nearestLandmark}
                       onChange={(e) => setNearestLandmark(e.target.value)}
                       className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                      placeholder="any famous place nearby"
+                      placeholder="Any famous place nearby"
                     />
                   </div>
                   <div>
@@ -363,31 +417,186 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("cod")}
+                      onClick={() => {
+                        setPaymentType("cod");
+                        setOnlineOption(null);
+                        setReceiptFile(null);
+                      }}
                       className={`p-4 border rounded-md flex items-center justify-center space-x-2 ${
-                        paymentMethod === "cod"
+                        paymentType === "cod"
                           ? "border-green-500 bg-green-50"
                           : "border-gray-200"
                       }`}
                     >
-                      <FaMoneyBill className="text-green-500" />
+                      <FaMoneyBill className="text-green-500" size={24} />
                       <span>Cash on Delivery</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("online")}
+                      onClick={() => {
+                        setPaymentType("online");
+                        setOnlineOption(null);
+                        setReceiptFile(null);
+                      }}
                       className={`p-4 border rounded-md flex items-center justify-center space-x-2 ${
-                        paymentMethod === "online"
-                          ? "border-green-500 bg-green-50"
+                        paymentType === "online"
+                          ? "border-blue-500 bg-blue-50"
                           : "border-gray-200"
                       }`}
                     >
-                      <FaCreditCard className="text-blue-500" />
+                      <FaCreditCard className="text-blue-500" size={24} />
                       <span>Online Payment</span>
                     </button>
                   </div>
                 </div>
-                {paymentMethod === "cod" && (
+                {paymentType === "online" && (
+                  <div className="mt-4 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOnlineOption("easypaisa");
+                          setReceiptFile(null);
+                        }}
+                        className={`p-4 border rounded-md flex flex-col items-center justify-center space-y-2 ${
+                          onlineOption === "easypaisa"
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <FaCreditCard className="text-green-500" size={24} />
+                        <span>EasyPaisa</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOnlineOption("jazzcash");
+                          setReceiptFile(null);
+                        }}
+                        className={`p-4 border rounded-md flex flex-col items-center justify-center space-y-2 ${
+                          onlineOption === "jazzcash"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <FaCreditCard className="text-blue-500" size={24} />
+                        <span>JazzCash</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOnlineOption("bank_transfer");
+                          setReceiptFile(null);
+                        }}
+                        className={`p-4 border rounded-md flex flex-col items-center justify-center space-y-2 ${
+                          onlineOption === "bank_transfer"
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <FaCreditCard className="text-red-500" size={24} />
+                        <span>Bank Transfer</span>
+                      </button>
+                    </div>
+                    {onlineOption === "easypaisa" && (
+                      <div className="mt-4 p-4 border rounded-md bg-gray-50">
+                        <h3 className="text-lg font-semibold mb-2">
+                          {easypaisaDetails.title}
+                        </h3>
+                        <p>
+                          <strong>Account Number:</strong>{" "}
+                          {easypaisaDetails.accountNumber}
+                        </p>
+                        <p>
+                          <strong>Account Name:</strong>{" "}
+                          {easypaisaDetails.accountName}
+                        </p>
+                        <p>
+                          <strong>Instructions:</strong>{" "}
+                          {easypaisaDetails.instructions}
+                        </p>
+                        <div className="mt-4">
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Upload Payment Receipt <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setReceiptFile(e.target.files[0])}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {onlineOption === "jazzcash" && (
+                      <div className="mt-4 p-4 border rounded-md bg-gray-50">
+                        <h3 className="text-lg font-semibold mb-2">
+                          {jazzcashDetails.title}
+                        </h3>
+                        <p>
+                          <strong>Account Number:</strong>{" "}
+                          {jazzcashDetails.accountNumber}
+                        </p>
+                        <p>
+                          <strong>Account Name:</strong>{" "}
+                          {jazzcashDetails.accountName}
+                        </p>
+                        <p>
+                          <strong>Instructions:</strong>{" "}
+                          {jazzcashDetails.instructions}
+                        </p>
+                        <div className="mt-4">
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Upload Payment Receipt <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setReceiptFile(e.target.files[0])}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {onlineOption === "bank_transfer" && (
+                      <div className="mt-4 p-4 border rounded-md bg-gray-50">
+                        <h3 className="text-lg font-semibold mb-2">
+                          {bankTransferDetails.title}
+                        </h3>
+                        <p>
+                          <strong>Bank:</strong> {bankTransferDetails.bankName}
+                        </p>
+                        <p>
+                          <strong>Account Number:</strong>{" "}
+                          {bankTransferDetails.accountNumber}
+                        </p>
+                        <p>
+                          <strong>Account Name:</strong>{" "}
+                          {bankTransferDetails.accountName}
+                        </p>
+                        <p>
+                          <strong>Branch:</strong> {bankTransferDetails.branch}
+                        </p>
+                        <p>
+                          <strong>Instructions:</strong>{" "}
+                          {bankTransferDetails.instructions}
+                        </p>
+                        <div className="mt-4">
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Upload Payment Receipt <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setReceiptFile(e.target.files[0])}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {paymentType === "cod" && (
                   <div>
                     <label className="block text-sm text-gray-700 mb-1">
                       Change Request

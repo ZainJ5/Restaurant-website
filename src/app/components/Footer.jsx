@@ -98,7 +98,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row justify-between text-sm text-white space-y-4 sm:space-y-0">
             <p>Powered by Name.</p>
             <div className="space-x-4">
-              <Link href="#" className="hover:underline">
+              <Link href="/terms" className="hover:underline">
                 Terms &amp; Conditions
               </Link>
               <Link href="#" className="hover:underline">

@@ -17,6 +17,8 @@ const OrderSchema = new mongoose.Schema(
     email: { type: String },
     paymentInstructions: { type: String },
     paymentMethod: { type: String, enum: ["cod", "online"], default: "cod" },
+    bankName: { type: String }, 
+    receiptImageUrl: { type: String }, 
     changeRequest: { type: String },
     items: [OrderItemSchema],
     subtotal: { type: Number, required: true },

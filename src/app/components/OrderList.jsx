@@ -4,7 +4,6 @@ export default function OrderList() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper to extract values from MongoDB's nested types
   const extractValue = (field) => {
     if (typeof field === "object" && field !== null) {
       if (field.$numberInt) {
@@ -158,9 +157,33 @@ export default function OrderList() {
                     <strong>Change Request:</strong> {order.changeRequest}
                   </p>
                 )}
-                <p>
-                  <strong>Order Type:</strong> {order.orderType}
-                </p>
+                {order.orderType && (
+                  <p>
+                    <strong>Order Type:</strong> {order.orderType}
+                  </p>
+                )}
+                {order.paymentMethod === "online" && (
+                  <>
+                    {order.bankName && (
+                      <p>
+                        <strong>Bank Name:</strong> {order.bankName}
+                      </p>
+                    )}
+                    {order.receiptImageUrl && (
+                      <p>
+                        <strong>Receipt:</strong>{" "}
+                        <a
+                          href={order.receiptImageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          View Receipt
+                        </a>
+                      </p>
+                    )}
+                  </>
+                )}
                 <div>
                   <strong>Items:</strong>
                   <ul className="list-disc ml-5">
@@ -174,9 +197,7 @@ export default function OrderList() {
                 </div>
                 <div className="mt-2 flex gap-2">
                   <button
-                    onClick={() =>
-                      toggleCompletion(id, order.isCompleted)
-                    }
+                    onClick={() => toggleCompletion(id, order.isCompleted)}
                     className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
                   >
                     {order.isCompleted

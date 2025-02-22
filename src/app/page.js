@@ -15,7 +15,6 @@ import DeliveryPickupModal from "./components/DeliveryPickupModal";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Replace "9999999999" with your actual phone number
   const handleWhatsAppClick = () => {
     window.open(
       "https://wa.me/9999999999?text=Hello%20from%20the%20Restaurant!",

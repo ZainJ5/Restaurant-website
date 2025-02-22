@@ -156,7 +156,7 @@ export default function Hero() {
           ))}
         </div>
 
-        <div className="absolute bottom-[-6px] left-0 w-full">
+        <div className="absolute bottom-[-7px] left-0 w-full">
           <div className="w-full" style={{ aspectRatio: '1765.2256 / 102.3469' }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
