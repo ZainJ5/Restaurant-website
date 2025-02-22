@@ -264,7 +264,7 @@ export default function CheckoutPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {}}
+                  onClick={() => setIsGift(!isGift)}
                   className="inline-flex items-center justify-center px-4 py-2 border-2 border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors text-sm sm:text-base w-full sm:w-auto"
                 >
                   <FaGift className="mr-2" />
