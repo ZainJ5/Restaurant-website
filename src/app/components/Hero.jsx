@@ -1,9 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { FaShoppingCart, FaCreditCard } from 'react-icons/fa'
 import { useCartStore } from '../../store/cart' 
-import CartDrawer from './Cart'
 
 function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
   const [styles, setStyles] = useState({
@@ -63,14 +61,10 @@ function BannerSwiper() {
 
 export default function Hero() {
   const images = ['/hero.jpg', '/hero-2.jpg', '/hero-3.jpg']
-  const { items, total } = useCartStore()
-
   const [sliderState, setSliderState] = useState({
     current: 0,
     previous: null,
   })
-
-  const [isCartOpen, setIsCartOpen] = useState(false)
 
   const updateImage = (newIndex) => {
     if (newIndex === sliderState.current) return
@@ -94,7 +88,6 @@ export default function Hero() {
     <section className="relative">
       <BannerSwiper />
 
-      {/* Updated the aspect ratio here to reduce the banner height */}
       <div className="relative w-full aspect-[750/250] overflow-hidden">
         {sliderState.previous !== null && (
           <div className="absolute inset-0">
@@ -114,34 +107,6 @@ export default function Hero() {
             alt="Hero"
             animateIn={sliderState.previous !== null}
           />
-        </div>
-
-        <div
-          className="
-            z-50
-            fixed bottom-0 left-0 w-full
-            flex justify-center
-            sm:absolute sm:bottom-auto sm:left-auto sm:top-4 sm:right-4 sm:w-auto
-          "
-        >
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="
-              w-full sm:w-auto
-              bg-red-500 text-white 
-              px-4 py-3 
-              flex items-center justify-center 
-              shadow-lg 
-              text-xs sm:text-sm md:text-base 
-              rounded-md
-            "
-          >
-            <FaShoppingCart className="mr-2 text-sm sm:text-base md:text-lg" />
-            <span>{items.length}</span>
-            <div className="mx-3 h-4 sm:h-5 w-px bg-white"></div>
-            <FaCreditCard className="mr-2 text-sm sm:text-base md:text-lg" />
-            <span>Rs. {total}</span>
-          </button>
         </div>
 
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden sm:flex gap-2 z-10">
@@ -172,8 +137,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </section>
   )
 }

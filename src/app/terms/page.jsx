@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 
 export default function TermsAndConditionsPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen text-black bg-gray-50">
       <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -13,8 +13,8 @@ export default function TermsAndConditionsPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-12">
-        <div className="space-y-12">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-12 pb-24">
+      <div className="space-y-12">
           <section className="p-6 bg-white rounded-lg shadow-sm">
             <h2 className="text-2xl font-semibold mb-4">INTRODUCTION</h2>
             <p className="text-gray-700 leading-relaxed">

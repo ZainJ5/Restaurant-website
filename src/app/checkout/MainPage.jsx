@@ -7,8 +7,11 @@ import { useCartStore } from "../../store/cart";
 import { useBranchStore } from "../../store/branchStore";
 import DeliveryPickupModal from "../components/DeliveryPickupModal";
 import { areasOfLahore } from "../lib/areasOfLahore";
+import { useRouter } from "next/navigation";
+
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const [title, setTitle] = useState("Mr.");
   const [fullName, setFullName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -86,6 +89,10 @@ export default function CheckoutPage() {
     fetchPromoCodes();
   }, []);
 
+  useEffect(() => {
+    setAppliedDiscount(subtotal * 0.1);
+  }, [subtotal]);
+  
   const handleApplyPromo = () => {
     if (!promoCode.trim()) {
       toast.error("Please enter a promo code.", {
@@ -97,17 +104,20 @@ export default function CheckoutPage() {
       (p) => p.code.toLowerCase() === promoCode.trim().toLowerCase()
     );
     if (found && found.discount > 0) {
-      setAppliedDiscount(found.discount);
+      const totalDiscountPercentage = 10 + found.discount;
+      const newDiscount = subtotal * (totalDiscountPercentage / 100);
+      setAppliedDiscount(newDiscount);
       toast.success("Promo code applied successfully!", {
         style: { background: "#16a34a", color: "#ffffff" },
       });
     } else {
-      setAppliedDiscount(0);
+      setAppliedDiscount(subtotal * 0.1);
       toast.error("Invalid promo code. Please try a different code.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
     }
   };
+  
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -130,6 +140,12 @@ export default function CheckoutPage() {
     }
     if (!selectedArea) {
       toast.error("Please select your delivery area.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    if (subtotal < 500) {
+      toast.error("Minimum order value is Rs. 500. Please add more items to your order.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
@@ -208,6 +224,7 @@ export default function CheckoutPage() {
       console.log("Order placed successfully:", data);
       clearCart();
       resetFormFields();
+      router.push("/");
       toast.success("Your order has been placed successfully!", {
         style: { background: "#16a34a", color: "#ffffff" },
       });
