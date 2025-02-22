@@ -3,7 +3,7 @@ import MainPage from './MainPage'
 
 export default function page() {
   return (
-    <div>
+    <div className='text-black'>
       <MainPage/>
     </div>
   )
