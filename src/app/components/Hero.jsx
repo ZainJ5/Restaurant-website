@@ -94,7 +94,8 @@ export default function Hero() {
     <section className="relative">
       <BannerSwiper />
 
-      <div className="relative w-full aspect-[750/309] overflow-hidden">
+      {/* Updated the aspect ratio here to reduce the banner height */}
+      <div className="relative w-full aspect-[750/250] overflow-hidden">
         {sliderState.previous !== null && (
           <div className="absolute inset-0">
             <FadeImage

@@ -30,7 +30,7 @@ export default function Footer() {
               <h3 className="font-semibold">UAN Number</h3>
               <p>021-111 222 3333</p>
             </div>
-            
+
             <div className="sm:border-x sm:px-8 sm:border-x-gray-500">
               <h3 className="font-semibold">WhatsApp</h3>
               <p>0300 123 4567</p>
@@ -44,12 +44,13 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="flex w-full h-36">
+      <div className="flex w-full h-56">
         <div className="bg-blue-600 flex-1"></div>
         <div className="bg-red-600 flex-1"></div>
-        <div className="bg-yellow-500 flex-1"></div>
-        <div className="bg-green-500 flex-1"></div>
+        <div className="bg-yellow-500 flex-1 hidden sm:block"></div>
+        <div className="bg-green-500 flex-1 hidden sm:block"></div>
       </div>
+
 
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center py-12 sm:px-6 lg:px-8 text-center space-y-8 sm:space-y-0">
         <h3 className="text-3xl pl-8 font-bold">Download Our App!</h3>
