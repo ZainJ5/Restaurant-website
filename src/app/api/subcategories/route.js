@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/app/lib/mongoose";
 import Subcategory from "@/app/models/Subcategory";
-import Subcategory from "@/app/models/Branch";
+import Branch from "@/app/models/Branch";
 
 export async function GET(request) {
   try {
