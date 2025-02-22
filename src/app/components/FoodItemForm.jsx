@@ -23,22 +23,36 @@ export default function AddFoodItemForm({
   const [variationPrice, setVariationPrice] = useState("");
 
   useEffect(() => {
+    if (variations.length > 0) {
+      setPrice("");
+    }
+  }, [variations]);
+
+  useEffect(() => {
     if (selectedBranchId) {
       const filtered = categories.filter((cat) => {
-        return cat.branch === selectedBranchId || cat.branch?._id === selectedBranchId;
+        const branchId =
+          typeof cat.branch === "object" ? cat.branch._id : cat.branch;
+        return String(branchId) === String(selectedBranchId);
       });
       setFilteredCategories(filtered);
       setSelectedCategoryId("");
+      setFilteredSubcategories([]);
+      setSelectedSubcategoryId("");
     } else {
       setFilteredCategories([]);
       setSelectedCategoryId("");
+      setFilteredSubcategories([]);
+      setSelectedSubcategoryId("");
     }
   }, [selectedBranchId, categories]);
 
   useEffect(() => {
     if (selectedCategoryId) {
       const filtered = subcategories.filter((sub) => {
-        return sub.category === selectedCategoryId || sub.category?._id === selectedCategoryId;
+        const categoryId =
+          typeof sub.category === "object" ? sub.category._id : sub.category;
+        return String(categoryId) === String(selectedCategoryId);
       });
       setFilteredSubcategories(filtered);
       setSelectedSubcategoryId("");
@@ -49,7 +63,9 @@ export default function AddFoodItemForm({
   }, [selectedCategoryId, subcategories]);
 
   const handleFileChange = (e) => {
-    setFoodImageFile(e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      setFoodImageFile(e.target.files[0]);
+    }
   };
 
   const addVariation = () => {
@@ -57,8 +73,8 @@ export default function AddFoodItemForm({
       toast.error("Please provide both variation name and price.");
       return;
     }
-    setVariations([
-      ...variations,
+    setVariations((prev) => [
+      ...prev,
       { name: variationName.trim(), price: parseFloat(variationPrice) },
     ]);
     setVariationName("");
@@ -67,13 +83,14 @@ export default function AddFoodItemForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (
       !selectedBranchId ||
       !selectedCategoryId ||
       !selectedSubcategoryId ||
       !title.trim() ||
-      (variations.length === 0 && !price) ||
-      !foodImageFile
+      !foodImageFile ||
+      (variations.length === 0 && !price)
     ) {
       toast.error("Please fill in all mandatory fields.");
       return;
@@ -89,7 +106,6 @@ export default function AddFoodItemForm({
       formData.append("price", price);
     }
     formData.append("foodImage", foodImageFile);
-
     if (variations.length > 0) {
       formData.append("variations", JSON.stringify(variations));
     }
@@ -97,7 +113,6 @@ export default function AddFoodItemForm({
     try {
       await addFoodItem(formData);
       toast.success("Food item added successfully!");
-      // Reset form
       setSelectedBranchId("");
       setSelectedCategoryId("");
       setSelectedSubcategoryId("");
@@ -116,6 +131,7 @@ export default function AddFoodItemForm({
       <div>
         <label className="block font-medium mb-1">Select Branch</label>
         <select
+          required
           value={selectedBranchId}
           onChange={(e) => setSelectedBranchId(e.target.value)}
           className="w-full border rounded p-2"
@@ -132,6 +148,7 @@ export default function AddFoodItemForm({
       <div>
         <label className="block font-medium mb-1">Select Category</label>
         <select
+          required
           value={selectedCategoryId}
           onChange={(e) => setSelectedCategoryId(e.target.value)}
           className="w-full border rounded p-2"
@@ -149,6 +166,7 @@ export default function AddFoodItemForm({
       <div>
         <label className="block font-medium mb-1">Select Subcategory</label>
         <select
+          required
           value={selectedSubcategoryId}
           onChange={(e) => setSelectedSubcategoryId(e.target.value)}
           className="w-full border rounded p-2"
@@ -167,6 +185,7 @@ export default function AddFoodItemForm({
         <label className="block font-medium mb-1">Item Title</label>
         <input
           type="text"
+          required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full border rounded p-2"
@@ -187,7 +206,8 @@ export default function AddFoodItemForm({
       <div>
         <label className="block font-medium mb-1">
           Price{" "}
-          {variations.length > 0 && "(Disabled because variations determine the price)"}
+          {variations.length > 0 &&
+            "(Disabled because variations determine the price)"}
         </label>
         <input
           type="number"
@@ -196,6 +216,7 @@ export default function AddFoodItemForm({
           className="w-full border rounded p-2"
           placeholder="Enter price"
           disabled={variations.length > 0}
+          required={variations.length === 0}
         />
         {variations.length > 0 && (
           <p className="text-sm text-gray-600">
@@ -208,13 +229,13 @@ export default function AddFoodItemForm({
         <label className="block font-medium mb-1">Upload Image</label>
         <input
           type="file"
+          required
           onChange={handleFileChange}
           className="w-full border rounded p-2"
           accept="image/*"
         />
       </div>
 
-      {/* Variations Section */}
       <div>
         <label className="block font-medium mb-1">Variations (optional)</label>
         <div className="flex gap-2 mb-2">

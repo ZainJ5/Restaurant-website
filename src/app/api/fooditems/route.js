@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/app/lib/mongoose";
 import FoodItem from "@/app/models/FoodItem";
+import Category from "@/app/models/Category";
+import Subcategory from "@/app/models/Subcategory";
+import Branch from "@/app/models/Branch"; 
+
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/app/lib/firebase";
 
@@ -78,7 +82,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching items:", error);
     return NextResponse.json(
-      { message: "Failed to fetch items" },
+      { message: "Failed to fetch items", error: error.message },
       { status: 500 }
     );
   }
