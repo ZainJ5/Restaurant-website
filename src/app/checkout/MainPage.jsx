@@ -247,7 +247,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-center mb-8">
-            <img src="/Logo.jpeg" alt="Logo" className="h-24 sm:h-32" />
+            <img src="/logo.png" alt="Logo" className="h-24 sm:h-32" />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
             <div className="lg:col-span-2 bg-white rounded-lg p-4 sm:p-6 shadow-sm">
