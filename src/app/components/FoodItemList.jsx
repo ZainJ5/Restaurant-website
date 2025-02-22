@@ -6,6 +6,16 @@ import { toast } from "react-toastify";
 export default function FoodItemList() {
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editData, setEditData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    category: "",
+    subcategory: "",
+    branch: "",
+  });
+  const [editImage, setEditImage] = useState(null);
 
   useEffect(() => {
     fetchFoodItems();
@@ -45,7 +55,6 @@ export default function FoodItemList() {
     }
   };
 
-  // Helper to extract values from MongoDB's nested types
   const extractValue = (field) => {
     if (typeof field === "object" && field !== null) {
       if (field.$numberInt) {
@@ -58,6 +67,98 @@ export default function FoodItemList() {
     return field;
   };
 
+  const handleEditClick = (item) => {
+    setEditingItemId(extractValue(item._id));
+    setEditData({
+      title: item.title || "",
+      description: item.description || "",
+      price: item.price || "",
+      category:
+        typeof item.category === "object" && item.category._id
+          ? item.category._id
+          : item.category || "",
+      subcategory:
+        typeof item.subcategory === "object" && item.subcategory._id
+          ? item.subcategory._id
+          : item.subcategory || "",
+      branch:
+        typeof item.branch === "object" && item.branch._id
+          ? item.branch._id
+          : item.branch || "",
+    });
+    setEditImage(null);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditImage(e.target.files[0]);
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingItemId) return;
+
+    const formData = new FormData();
+    formData.append("title", editData.title);
+    formData.append("description", editData.description);
+    formData.append("price", editData.price);
+    formData.append("category", editData.category);
+    formData.append("subcategory", editData.subcategory);
+    formData.append("branch", editData.branch);
+
+    if (editImage) {
+      formData.append("foodImage", editImage);
+    }
+
+    try {
+      const res = await fetch(`/api/fooditems/${editingItemId}`, {
+        method: "PATCH",
+        body: formData,
+      });
+      if (res.ok) {
+        toast.success("Item updated successfully");
+        setEditingItemId(null);
+        setEditData({
+          title: "",
+          description: "",
+          price: "",
+          category: "",
+          subcategory: "",
+          branch: "",
+        });
+        setEditImage(null);
+        fetchFoodItems();
+      } else {
+        toast.error("Failed to update item");
+      }
+    } catch (error) {
+      console.error("Error updating item:", error);
+      toast.error("Error updating item");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItemId(null);
+    setEditData({
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      subcategory: "",
+      branch: "",
+    });
+    setEditImage(null);
+  };
+
   if (loading) return <p>Loading food items...</p>;
   if (foodItems.length === 0) return <p>No food items available.</p>;
 
@@ -66,6 +167,101 @@ export default function FoodItemList() {
       {foodItems.map((item) => {
         const id = extractValue(item._id);
         const price = extractValue(item.price);
+
+        if (editingItemId === id) {
+          return (
+            <div key={id} className="border p-4 rounded">
+              <form onSubmit={handleEditSubmit} className="space-y-2">
+                <input
+                  type="text"
+                  name="title"
+                  value={editData.title}
+                  onChange={handleEditChange}
+                  placeholder="Title"
+                  className="border p-2 w-full"
+                />
+                <textarea
+                  name="description"
+                  value={editData.description}
+                  onChange={handleEditChange}
+                  placeholder="Description"
+                  className="border p-2 w-full"
+                ></textarea>
+                <input
+                  type="number"
+                  name="price"
+                  value={editData.price}
+                  onChange={handleEditChange}
+                  placeholder="Price"
+                  className="border p-2 w-full"
+                />
+                <div>
+                  <label className="block text-sm font-semibold">
+                    Category ID (not editable)
+                  </label>
+                  <input
+                    type="text"
+                    name="category"
+                    value={editData.category}
+                    disabled
+                    className="border p-2 w-full bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold">
+                    Subcategory ID (not editable)
+                  </label>
+                  <input
+                    type="text"
+                    name="subcategory"
+                    value={editData.subcategory}
+                    disabled
+                    className="border p-2 w-full bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold">
+                    Branch ID (not editable)
+                  </label>
+                  <input
+                    type="text"
+                    name="branch"
+                    value={editData.branch}
+                    disabled
+                    className="border p-2 w-full bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold">
+                    Update Image (optional)
+                  </label>
+                  <input
+                    type="file"
+                    name="foodImage"
+                    onChange={handleImageChange}
+                    className="border p-2 w-full"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          );
+        }
+
         return (
           <div
             key={id}
@@ -78,12 +274,10 @@ export default function FoodItemList() {
                 className="w-24 h-24 object-cover rounded"
               />
             )}
-
             <div className="flex-1 w-full">
               <h3 className="text-xl font-bold">{item.title}</h3>
               <p>{item.description}</p>
               <p className="font-semibold">{price} Rs</p>
-
               {item.branch &&
               typeof item.branch === "object" &&
               item.branch.name ? (
@@ -97,7 +291,6 @@ export default function FoodItemList() {
                   </p>
                 )
               )}
-
               {item.category &&
               typeof item.category === "object" &&
               item.category.name ? (
@@ -111,7 +304,6 @@ export default function FoodItemList() {
                   </p>
                 )
               )}
-
               {item.subcategory &&
               typeof item.subcategory === "object" &&
               item.subcategory.name ? (
@@ -125,7 +317,6 @@ export default function FoodItemList() {
                   </p>
                 )
               )}
-
               {item.variations && item.variations.length > 0 && (
                 <div className="mt-2">
                   <p className="font-semibold">Variations:</p>
@@ -139,13 +330,20 @@ export default function FoodItemList() {
                 </div>
               )}
             </div>
-
-            <button
-              onClick={() => deleteFoodItem(id)}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition w-full md:w-auto"
-            >
-              Delete
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleEditClick(item)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => deleteFoodItem(id)}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         );
       })}
