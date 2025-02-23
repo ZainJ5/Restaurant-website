@@ -101,14 +101,11 @@ export default function Footer() {
               <Link href="/terms" className="hover:underline">
                 Terms &amp; Conditions
               </Link>
-              <Link href="#" className="hover:underline">
+              <Link href="/privacy-policy" className="hover:underline">
                 Privacy Policy
               </Link>
-              <Link href="#" className="hover:underline">
+              <Link href="/refund-policy" className="hover:underline">
                 Returns &amp; Refund
-              </Link>
-              <Link href="#" className="hover:underline">
-                Faqs
               </Link>
             </div>
           </div>
