@@ -28,8 +28,8 @@ export default function Home() {
       <DeliveryPickupModal />
 
       <main className="min-h-screen bg-white text-black relative pb-20 sm:pb-0">
+        <StickyCartButton className="fixed" />
         <Hero />
-        <StickyCartButton />
         <Navbar />
         <MenuTabs />
         <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />

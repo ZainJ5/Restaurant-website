@@ -35,7 +35,7 @@ function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
   )
 }
 
-function BannerSwiper() {
+function  BannerSwiper() {
   const banners = [
     'Welcome Restaurant Name',
     'Flat 10% Off on all Items',

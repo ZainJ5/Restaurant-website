@@ -18,7 +18,7 @@ export default function CartButton() {
 
   return (
     <>
-      <div className="hidden sm:block absolute top-14 right-4 z-50">
+      <div className="hidden sm:block sticky top-16 right-4 z-50 self-end mt-[-40px] float-right">
         <button
           onClick={() => setIsCartOpen(true)}
           className="
@@ -28,6 +28,7 @@ export default function CartButton() {
             shadow-lg 
             text-sm md:text-base 
             rounded-md
+            transition-transform hover:scale-105
           "
         >
           <FaShoppingCart className="mr-2 text-base md:text-lg" />
@@ -38,6 +39,7 @@ export default function CartButton() {
         </button>
       </div>
 
+      {/* Mobile version remains fixed */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white p-2">
         <button
           onClick={() => setIsCartOpen(true)}
