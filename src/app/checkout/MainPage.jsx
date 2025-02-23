@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaCreditCard, FaMoneyBill, FaGift } from "react-icons/fa";
+import { FaCreditCard, FaMoneyBill } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useOrderTypeStore } from "../../store/orderTypeStore";
 import { useCartStore } from "../../store/cart";
@@ -8,7 +8,6 @@ import { useBranchStore } from "../../store/branchStore";
 import DeliveryPickupModal from "../components/DeliveryPickupModal";
 import { areasOfLahore } from "../lib/areasOfLahore";
 import { useRouter } from "next/navigation";
-
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -118,7 +117,6 @@ export default function CheckoutPage() {
     }
   };
   
-
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
       toast.error("Your cart is empty. Please add items before placing an order.", {
@@ -128,6 +126,14 @@ export default function CheckoutPage() {
     }
     if (!fullName.trim() || !mobileNumber.trim() || !deliveryAddress.trim()) {
       toast.error("Please fill in all required fields.", {
+        style: { background: "#dc2626", color: "#ffffff" },
+      });
+      return;
+    }
+    const phoneRegex = /^03[0-9]{9}$/;
+    if (!phoneRegex.test(mobileNumber.trim())) {
+      alert("Please enter a valid number")
+      toast.error("Please enter a valid number", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
@@ -279,14 +285,6 @@ export default function CheckoutPage() {
                     Just a last step, please enter your details:
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsGift(!isGift)}
-                  className="inline-flex items-center justify-center px-4 py-2 border-2 border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors text-sm sm:text-base w-full sm:w-auto"
-                >
-                  <FaGift className="mr-2" />
-                  <span>{isGift ? "Remove Gift Option" : "Send as a Gift"}</span>
-                </button>
               </div>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -326,6 +324,7 @@ export default function CheckoutPage() {
                       onChange={(e) => setMobileNumber(e.target.value)}
                       className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
                       placeholder="03xx-xxxxxxx"
+                      pattern="^03[0-9]{9}$"
                     />
                   </div>
                   <div>
@@ -413,20 +412,7 @@ export default function CheckoutPage() {
                     rows={3}
                   />
                 </div>
-                {isGift && (
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Gift Message
-                    </label>
-                    <textarea
-                      value={giftMessage}
-                      onChange={(e) => setGiftMessage(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                      placeholder="Enter a gift message"
-                      rows={3}
-                    />
-                  </div>
-                )}
+                {/* Removed gift message section */}
                 <div>
                   <label className="block text-sm text-gray-700 mb-2">
                     Payment Information
@@ -678,22 +664,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <div className="mt-6">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-l-md"
-                    placeholder="Enter Voucher / Promo code"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyPromo}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-r-md hover:bg-gray-300 transition-colors"
-                  >
-                    Apply
-                  </button>
-                </div>
                 <button
                   type="button"
                   onClick={handlePlaceOrder}
