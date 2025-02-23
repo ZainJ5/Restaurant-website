@@ -7,15 +7,25 @@ import { Truck, ShoppingBag } from "lucide-react";
 export default function DeliveryPickupModal() {
   const { orderType, setOrderType } = useOrderTypeStore();
   const { branch, setBranch } = useBranchStore();
-  const [open, setOpen] = useState(true);
-  const [branches, setBranches] = useState([]);
-
+  
+  // Use default branch value instead of fetching from API
+  const [branches, setBranches] = useState([
+    {
+      _id: "67b904f9397c3ee1c79e08d1",
+      name: "Clifton",
+      createdAt: "2025-02-21T22:58:01.942+00:00",
+      updatedAt: "2025-02-21T22:58:01.942+00:00",
+      __v: 0,
+    },
+  ]);
+  
+  // Commented out API call for branches
+  /*
   useEffect(() => {
     async function fetchBranches() {
       try {
         const res = await fetch("/api/branches");
         const data = await res.json();
-        console.log("Fetched branches:", data);
         setBranches(data);
       } catch (error) {
         console.error("Error fetching branches:", error);
@@ -23,6 +33,9 @@ export default function DeliveryPickupModal() {
     }
     fetchBranches();
   }, []);
+  */
+
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     if (branch && orderType) {
@@ -60,11 +73,9 @@ export default function DeliveryPickupModal() {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
-        
         <div className="bg-red-600 text-white text-center py-4 px-6">
           <h2 className="text-2xl font-bold">Select your branch and order type</h2>
         </div>
-
         <div className="p-6 space-y-8">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Select Branch</h3>
@@ -89,7 +100,6 @@ export default function DeliveryPickupModal() {
               })}
             </div>
           </div>
-
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Select Order Type</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -110,7 +120,6 @@ export default function DeliveryPickupModal() {
                 />
                 <span className="font-semibold text-sm">Delivery</span>
               </button>
-
               <button
                 onClick={() => handleOrderTypeSelect("pickup")}
                 className={`flex flex-col items-center p-4 border rounded-md 
@@ -130,7 +139,6 @@ export default function DeliveryPickupModal() {
               </button>
             </div>
           </div>
-
           <p className="text-xs text-gray-500">
             You can change these preferences later in your account settings.
           </p>

@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
+  const [orderNumbers, setOrderNumbers] = useState({});
   const [loading, setLoading] = useState(true);
-  // Filter options: "all", "today", "completed", "pending"
-  const [filter, setFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [sortOrder, setSortOrder] = useState("desc"); // "asc" for oldest first, "desc" for newest first
 
+  // Helper to extract the value from a possible MongoDB extended JSON field.
   const extractValue = (field) => {
     if (typeof field === "object" && field !== null) {
       if (field.$numberInt) {
@@ -40,6 +42,13 @@ export default function OrderList() {
       const data = text ? JSON.parse(text) : [];
       if (Array.isArray(data)) {
         setOrders(data);
+        // Create a mapping from order _id (as string) to a fixed order number.
+        const mapping = {};
+        data.forEach((order, index) => {
+          const idVal = String(extractValue(order._id));
+          mapping[idVal] = "tipu-" + (index + 1).toString().padStart(3, "0");
+        });
+        setOrderNumbers(mapping);
       } else {
         console.error("Expected an array but got:", data);
         setOrders([]);
@@ -65,11 +74,15 @@ export default function OrderList() {
       const updatedOrder = await res.json();
       setOrders((prev) =>
         prev.map((order) =>
-          extractValue(order._id) === extractValue(updatedOrder._id)
-            ? updatedOrder
-            : order
+          String(extractValue(order._id)) === orderId ? updatedOrder : order
         )
       );
+      if (
+        selectedOrder &&
+        String(extractValue(selectedOrder._id)) === orderId
+      ) {
+        setSelectedOrder(updatedOrder);
+      }
     } catch (error) {
       console.error("Error updating order:", error);
     }
@@ -81,212 +94,186 @@ export default function OrderList() {
         method: "DELETE",
       });
       if (!res.ok) {
-        console.error("Failed to delete order");
+        console.error("Failed to delete order. Status:", res.status);
         return;
       }
       setOrders((prev) =>
-        prev.filter((order) => extractValue(order._id) !== orderId)
+        prev.filter((order) => String(extractValue(order._id)) !== orderId)
       );
+      if (selectedOrder && String(extractValue(selectedOrder._id)) === orderId) {
+        setSelectedOrder(null);
+      }
     } catch (error) {
       console.error("Error deleting order:", error);
     }
   };
 
-  // Filter orders based on the selected filter
-  const filteredOrders = orders.filter((order) => {
-    if (filter === "today") {
-      if (order.createdAt) {
-        const orderDate = new Date(order.createdAt);
-        const today = new Date();
-        return (
-          orderDate.getDate() === today.getDate() &&
-          orderDate.getMonth() === today.getMonth() &&
-          orderDate.getFullYear() === today.getFullYear()
-        );
-      }
-      return false;
-    } else if (filter === "completed") {
-      return order.isCompleted;
-    } else if (filter === "pending") {
-      return !order.isCompleted;
-    }
-    return true; // "all"
-  });
+  const closeModal = () => setSelectedOrder(null);
 
-  if (loading) return <p className="text-center py-8">Loading orders...</p>;
+  // Sort orders by createdAt timestamp.
+  const sortedOrders = [...orders].sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-3xl font-bold mb-6 text-center">Order List</h2>
-      <div className="flex flex-wrap gap-2 justify-center mb-6">
-        <button
-          onClick={() => setFilter("all")}
-          className={`px-4 py-2 rounded ${
-            filter === "all"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-          }`}
-        >
-          All Orders
-        </button>
-        <button
-          onClick={() => setFilter("today")}
-          className={`px-4 py-2 rounded ${
-            filter === "today"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-          }`}
-        >
-          Today's Orders
-        </button>
-        <button
-          onClick={() => setFilter("completed")}
-          className={`px-4 py-2 rounded ${
-            filter === "completed"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-          }`}
-        >
-          Completed
-        </button>
-        <button
-          onClick={() => setFilter("pending")}
-          className={`px-4 py-2 rounded ${
-            filter === "pending"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-          }`}
-        >
-          Pending
-        </button>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold">Order List</h2>
+        <div>
+          <label htmlFor="sort" className="mr-2 font-medium">
+            Sort by Date:
+          </label>
+          <select
+            id="sort"
+            className="px-3 py-1 border rounded"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+        </div>
       </div>
-      {filteredOrders.length === 0 ? (
-        <p className="text-center">No orders found for the selected filter.</p>
+      {loading ? (
+        <p className="text-center">Loading orders...</p>
+      ) : sortedOrders.length === 0 ? (
+        <p className="text-center">No orders found.</p>
       ) : (
-        <div className="space-y-6">
-          {filteredOrders.map((order) => {
-            const id = extractValue(order._id);
-            const total = extractValue(order.total);
-            const subtotal = extractValue(order.subtotal);
-            const tax = extractValue(order.tax);
-            const discount = extractValue(order.discount);
+        <ul className="space-y-4">
+          {sortedOrders.map((order) => {
+            const idVal = String(extractValue(order._id));
+            const orderNumber = orderNumbers[idVal] || "tipu-000";
+            const status = order.isCompleted ? "Completed" : "Pending";
             return (
-              <div
-                key={id}
-                className="bg-white shadow-md rounded-lg p-6 border border-gray-200"
+              <li
+                key={idVal}
+                className="cursor-pointer p-4 border rounded shadow hover:bg-gray-100 flex justify-between items-center"
+                onClick={() => setSelectedOrder(order)}
               >
-                <h3 className="font-bold text-xl mb-2">
-                  Order for: {order.fullName}
-                </h3>
-                <p className="mb-1">
-                  <strong>Mobile:</strong> {order.mobileNumber}{" "}
-                  {order.alternateMobile && (
-                    <span>(Alternate: {order.alternateMobile})</span>
-                  )}
-                </p>
-                <p className="mb-1">
-                  <strong>Email:</strong> {order.email}
-                </p>
-                <p className="mb-1">
-                  <strong>Address:</strong> {order.deliveryAddress}
-                </p>
-                {order.nearestLandmark && (
-                  <p className="mb-1">
-                    <strong>Nearest Landmark:</strong> {order.nearestLandmark}
-                  </p>
-                )}
-                <div className="my-2">
-                  <p>
-                    <strong>Subtotal:</strong> {subtotal} Rs
-                  </p>
-                  <p>
-                    <strong>Tax:</strong> {tax} Rs
-                  </p>
-                  <p>
-                    <strong>Discount:</strong> {discount} Rs
-                  </p>
-                  <p>
-                    <strong>Total:</strong> {total} Rs
-                  </p>
-                </div>
-                {order.promoCode && (
-                  <p className="mb-1">
-                    <strong>Promo Code:</strong> {order.promoCode}
-                  </p>
-                )}
-                <p className="mb-1">
-                  <strong>Payment Method:</strong> {order.paymentMethod}
-                </p>
-                {order.paymentInstructions && (
-                  <p className="mb-1">
-                    <strong>Payment Instructions:</strong>{" "}
-                    {order.paymentInstructions}
-                  </p>
-                )}
-                {order.changeRequest && (
-                  <p className="mb-1">
-                    <strong>Change Request:</strong> {order.changeRequest}
-                  </p>
-                )}
-                {order.orderType && (
-                  <p className="mb-1">
-                    <strong>Order Type:</strong> {order.orderType}
-                  </p>
-                )}
-                {order.paymentMethod === "online" && (
-                  <>
-                    {order.bankName && (
-                      <p className="mb-1">
-                        <strong>Bank Name:</strong> {order.bankName}
-                      </p>
-                    )}
-                    {order.receiptImageUrl && (
-                      <p className="mb-1">
-                        <strong>Receipt:</strong>{" "}
-                        <a
-                          href={order.receiptImageUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 underline hover:text-blue-800"
-                        >
-                          View Receipt
-                        </a>
-                      </p>
-                    )}
-                  </>
-                )}
-                <div className="my-3">
-                  <strong>Items:</strong>
-                  <ul className="list-disc ml-6 mt-1">
-                    {order.items.map((item, index) => (
-                      <li key={index}>
-                        {item.name} - {extractValue(item.price)} Rs
-                        {item.type && <span> (Type: {item.type})</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="flex gap-4 mt-4">
-                  <button
-                    onClick={() => toggleCompletion(id, order.isCompleted)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                  >
-                    {order.isCompleted
-                      ? "Mark as Incomplete"
-                      : "Mark as Completed"}
-                  </button>
-                  {order.isCompleted && (
-                    <button
-                      onClick={() => deleteOrder(id)}
-                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-                    >
-                      Delete Order
-                    </button>
-                  )}
-                </div>
-              </div>
+                <span className="font-semibold">{orderNumber}</span>
+                <span
+                  className={`font-semibold ${
+                    order.isCompleted ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {status}
+                </span>
+              </li>
             );
           })}
+        </ul>
+      )}
+
+      {/* Modal Popup for Order Details */}
+      {selectedOrder && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-lg w-full">
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="text-xl font-bold mb-4">Order Details</h3>
+            <p>
+              <strong>Full Name:</strong> {selectedOrder.fullName}
+            </p>
+            <p>
+              <strong>Mobile:</strong> {selectedOrder.mobileNumber}
+            </p>
+            {selectedOrder.alternateMobile && (
+              <p>
+                <strong>Alternate Mobile:</strong> {selectedOrder.alternateMobile}
+              </p>
+            )}
+            {selectedOrder.email && (
+              <p>
+                <strong>Email:</strong> {selectedOrder.email}
+              </p>
+            )}
+            {selectedOrder.deliveryAddress && (
+              <p>
+                <strong>Address:</strong> {selectedOrder.deliveryAddress}
+              </p>
+            )}
+            {selectedOrder.nearestLandmark && (
+              <p>
+                <strong>Nearest Landmark:</strong> {selectedOrder.nearestLandmark}
+              </p>
+            )}
+            <p>
+              <strong>Payment Method:</strong> {selectedOrder.paymentMethod}
+            </p>
+            {selectedOrder.promoCode && (
+              <p>
+                <strong>Promo Code:</strong> {selectedOrder.promoCode}
+              </p>
+            )}
+            <div className="mt-4">
+              <strong>Items:</strong>
+              <ul className="list-disc ml-6">
+                {selectedOrder.items.map((item, i) => (
+                  <li key={i}>
+                    {item.name} - {extractValue(item.price)} Rs{" "}
+                    {item.type && `(Type: ${item.type})`}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-4">
+              <p>
+                <strong>Subtotal:</strong> {extractValue(selectedOrder.subtotal)} Rs
+              </p>
+              <p>
+                <strong>Tax:</strong> {extractValue(selectedOrder.tax)} Rs
+              </p>
+              <p>
+                <strong>Discount:</strong> {extractValue(selectedOrder.discount)} Rs
+              </p>
+              <p>
+                <strong>Total:</strong> {extractValue(selectedOrder.total)} Rs
+              </p>
+            </div>
+            {selectedOrder.isGift && selectedOrder.giftMessage && (
+              <p className="mt-2">
+                <strong>Gift Message:</strong> {selectedOrder.giftMessage}
+              </p>
+            )}
+            {selectedOrder.branch && (
+              <p className="mt-2">
+                <strong>Branch:</strong> {String(extractValue(selectedOrder.branch))}
+              </p>
+            )}
+            {selectedOrder.createdAt && (
+              <p className="mt-2 text-sm text-gray-600">
+                <strong>Order Date:</strong>{" "}
+                {new Date(selectedOrder.createdAt).toLocaleString()}
+              </p>
+            )}
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={() =>
+                  toggleCompletion(
+                    String(extractValue(selectedOrder._id)),
+                    selectedOrder.isCompleted
+                  )
+                }
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                {selectedOrder.isCompleted ? "Mark as Pending" : "Mark as Completed"}
+              </button>
+              <button
+                onClick={() =>
+                  deleteOrder(String(extractValue(selectedOrder._id)))
+                }
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+              >
+                Delete Order
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
