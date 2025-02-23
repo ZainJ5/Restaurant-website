@@ -11,6 +11,10 @@ export default function CartDrawer({ isOpen, onClose }) {
   const { items, total, itemCount, updateItemQuantity } = useCartStore();
 
   const handleCheckout = () => {
+    if (total < 500) {
+      toast.error("Minimum order value is Rs. 500.");
+      return;
+    }
     router.push('/checkout');
     onClose();
   }
