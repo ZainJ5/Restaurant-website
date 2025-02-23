@@ -57,7 +57,7 @@ export default function Footer() {
 
         <div className="flex justify-center space-x-4">
           <Link
-            href="https://apps.apple.com/de/app/stihl/id382028262"
+            href="https://restaurant-website-pi-rouge.vercel.app/"
             target="_blank"
             title="Download on the App Store"
             className="relative inline-block m-[5px] pt-[15px] pr-[16px] pb-[5px] pl-[40px] text-lg leading-[1.33] rounded-md whitespace-nowrap cursor-pointer select-none border border-black font-semibold bg-[#111] text-white no-underline hover:bg-[#2c2b2b] focus:bg-[#555] active:bg-[#555] focus:outline-none"
@@ -73,7 +73,7 @@ export default function Footer() {
           </Link>
 
           <Link
-            href="https://play.google.com/store/apps/details?id=com.stihl.app&hl=en"
+            href="https://restaurant-website-pi-rouge.vercel.app/"
             target="_blank"
             title="Google Play"
             className="relative inline-block m-[5px] pt-[15px] pr-[16px] pb-[5px] pl-[40px] text-lg leading-[1.33] rounded-md whitespace-nowrap cursor-pointer select-none border border-black font-semibold bg-[#111] text-white no-underline hover:bg-[#2c2b2b] focus:bg-[#555] active:bg-[#555] focus:outline-none"
