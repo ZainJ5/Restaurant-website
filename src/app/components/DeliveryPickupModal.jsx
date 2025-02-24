@@ -81,7 +81,7 @@ export default function DeliveryPickupModal() {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
         <div className="bg-red-600 text-white text-center py-4 px-6">
-          <h2 className="text-2xl font-bold">Select your branch and order type</h2>
+          <h2 className="text-2xl font-bold">Select your Order type</h2>
         </div>
         <div className="p-6 space-y-8">
           <div>
