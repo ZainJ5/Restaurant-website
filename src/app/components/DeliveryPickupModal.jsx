@@ -19,6 +19,13 @@ export default function DeliveryPickupModal() {
     },
   ]);
   
+  // Automatically set the default branch (Clifton) on mount
+  useEffect(() => {
+    if (!branch && branches.length > 0) {
+      setBranch(branches[0]);
+    }
+  }, [branch, branches, setBranch]);
+  
   // Commented out API call for branches
   /*
   useEffect(() => {
@@ -60,10 +67,6 @@ export default function DeliveryPickupModal() {
     setOrderType(type);
   };
 
-  const handleBranchSelect = (selectedBranch) => {
-    setBranch(selectedBranch);
-  };
-
   if (!open) return null;
 
   const getBranchId = (b) => {
@@ -74,7 +77,7 @@ export default function DeliveryPickupModal() {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
         <div className="bg-red-600 text-white text-center py-4 px-6">
-          <h2 className="text-2xl font-bold">Select your branch and order type</h2>
+          <h2 className="text-2xl font-bold">Select order type</h2>
         </div>
         <div className="p-6 space-y-8">
           <div>
@@ -86,12 +89,12 @@ export default function DeliveryPickupModal() {
                 return (
                   <button
                     key={branchId}
-                    onClick={() => handleBranchSelect(b)}
+                    disabled
                     className={`w-full p-3 text-sm font-semibold border rounded-md 
                       transition-colors ${
                         isSelected
-                          ? "bg-red-600 text-white border-red-600"
-                          : "bg-white text-gray-700 border-gray-300 hover:bg-red-50 hover:border-red-500"
+                          ? "bg-red-600 text-white border-red-600 cursor-not-allowed"
+                          : "bg-white text-gray-700 border-gray-300"
                       }`}
                   >
                     {b.name}
