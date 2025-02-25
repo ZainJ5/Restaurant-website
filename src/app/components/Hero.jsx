@@ -18,8 +18,8 @@ function BannerSwiper() {
   }, [banners.length])
 
   return (
-    <div className="bg-white text-center py-1">
-      <h2 className="text-red-600 text-sm md:text-xl font-semibold">
+    <div className="bg-white py-1 flex justify-center items-center w-full">
+      <h2 className="text-red-600 text-sm md:text-xl font-semibold px-4 mx-auto max-w-full text-center">
         {banners[currentBanner]}
       </h2>
     </div>
