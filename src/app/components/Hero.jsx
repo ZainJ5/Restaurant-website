@@ -1,41 +1,8 @@
 'use client'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { useCartStore } from '../../store/cart' 
 
-function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
-  const [styles, setStyles] = useState({
-    opacity: animateIn ? 0 : 1,
-    transform: animateIn ? 'scale(0.95)' : 'scale(1)',
-  })
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (animateIn) {
-        setStyles({ opacity: 1, transform: 'scale(1)' })
-      }
-      if (animateOut) {
-        setStyles({ opacity: 0, transform: 'scale(1.05)' })
-      }
-    }, 50)
-    return () => clearTimeout(timer)
-  }, [animateIn, animateOut])
-
-  return (
-    <div
-      style={{
-        ...styles,
-        transition: 'opacity 0.8s ease-in-out, transform 0.8s ease-in-out',
-      }}
-      onTransitionEnd={onAnimationEnd}
-      className="w-full h-full"
-    >
-      <Image src={src} alt={alt} fill style={{ objectFit: 'cover' }} priority />
-    </div>
-  )
-}
-
-function  BannerSwiper() {
+function BannerSwiper() {
   const banners = [
     'Welcome Tipu Burger & Broast',
     'Flat 10% Off on all Items',
@@ -61,80 +28,67 @@ function  BannerSwiper() {
 
 export default function Hero() {
   const images = ['/hero.jpg', '/hero-2.jpg', '/hero-3.jpg']
-  const [sliderState, setSliderState] = useState({
-    current: 0,
-    previous: null,
-  })
+  const [current, setCurrent] = useState(0)
+  const [touchStartX, setTouchStartX] = useState(null)
+  const [touchEndX, setTouchEndX] = useState(null)
 
-  const updateImage = (newIndex) => {
-    if (newIndex === sliderState.current) return
-    setSliderState((prev) => ({
-      previous: prev.current,
-      current: newIndex,
-    }))
+  const nextImage = () => {
+    setCurrent((prev) => (prev + 1) % images.length)
+  }
+
+  const prevImage = () => {
+    setCurrent((prev) => (prev - 1 + images.length) % images.length)
   }
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSliderState((prev) => ({
-        previous: prev.current,
-        current: (prev.current + 1) % images.length,
-      }))
+      nextImage()
     }, 5000)
     return () => clearInterval(interval)
-  }, [images.length])
+  }, [])
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.changedTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.changedTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (touchStartX !== null && touchEndX !== null) {
+      const diff = touchStartX - touchEndX
+      if (Math.abs(diff) > 50) {
+        diff > 0 ? nextImage() : prevImage()
+      }
+    }
+    setTouchStartX(null)
+    setTouchEndX(null)
+  }
 
   return (
     <section className="relative">
       <BannerSwiper />
 
-      <div className="relative w-full aspect-[750/250] overflow-hidden">
-        {sliderState.previous !== null && (
-          <div className="absolute inset-0">
-            <FadeImage
-              src={images[sliderState.previous]}
-              alt="Hero"
-              animateOut={true}
-              onAnimationEnd={() =>
-                setSliderState((prev) => ({ ...prev, previous: null }))
-              }
-            />
-          </div>
-        )}
-        <div className="absolute inset-0">
-          <FadeImage
-            src={images[sliderState.current]}
-            alt="Hero"
-            animateIn={sliderState.previous !== null}
-          />
-        </div>
+      <div
+        className="relative w-full aspect-[750/250] overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <Image src={images[current]} alt="Hero" fill priority />
 
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden sm:flex gap-2 z-10">
-          {images.map((_, index) => (
+        {/* Dot navigation */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+          {images.map((_, idx) => (
             <button
-              key={index}
-              onClick={() => updateImage(index)}
+              key={idx}
+              onClick={() => setCurrent(idx)}
               className={`w-3 h-3 rounded-full focus:outline-none ${
-                sliderState.current === index ? 'bg-white' : 'bg-gray-400'
+                idx === current ? 'bg-red-600' : 'bg-gray-300'
               }`}
             />
           ))}
-        </div>
-
-        <div className="absolute bottom-[-7px] left-0 w-full">
-          <div className="w-full" style={{ aspectRatio: '1765.2256 / 102.3469' }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 1765.2256 102.3469"
-              className="w-full h-full fill-yellow-400"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0.2426 0 C378.8376 20.962 1108.2826 45.585 1765.2256 94.803 L0.2426 94.803 Z"
-                style={{ pointerEvents: 'none' }}
-              />
-            </svg>
-          </div>
         </div>
       </div>
     </section>

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import whatsapp from "../../../public/whatsapp-logo.png";
 import { useBranchStore } from "@/store/branchStore";
 
 export default function Navbar() {
@@ -31,10 +30,10 @@ export default function Navbar() {
   };
 
   const socialItems = [
-    { src: "/download.png", bg: "bg-red-700", href: "#" },
-    { src: whatsapp.src, bg: "bg-[rgb(42,168,26)]", href: "https://wa.me/923332245706" },
-    { src: "/phone.png", bg: "bg-blue-500", href: "tel:+92111822111" },
-    { src: "/facebook.png", bg: "bg-[rgb(12,144,242)]", href: "https://www.facebook.com/tipuburgerbroast" },
+    { src: "/download.webp", bg: "bg-red-700", href: "/tipu-menu-update-feb-25.pdf" },
+    { src: "/whatsapp-logo.webp", bg: "bg-[rgb(42,168,26)]", href: "https://wa.me/923332245706" },
+    { src: "/phone.webp", bg: "bg-blue-500", href: "tel:+92111822111" },
+    { src: "/facebook.webp", bg: "bg-[rgb(12,144,242)]", href: "https://www.facebook.com/tipuburgerbroast" },
     { src: "/instagram.png", bg: "bg-black", href: "https://www.tiktok.com/tipuburger" },
   ];
 
@@ -42,7 +41,7 @@ export default function Navbar() {
     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
       <div className="flex justify-center sm:justify-start">
         <Link href="/">
-          <div className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full border-[3px] sm:border-4 border-yellow-400 overflow-hidden -mt-8 sm:-mt-10 md:-mt-14">
+          <div className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 overflow-hidden -mt-8 sm:-mt-10 md:-mt-14 rounded-full">
             <Image src="/logo.png" alt="Logo" fill className="object-cover" />
           </div>
         </Link>
@@ -51,8 +50,8 @@ export default function Navbar() {
       <div className="pb-2 md:pb-4">
         <div className="flex flex-col sm:flex-row sm:flex-wrap justify-between items-center gap-4 sm:gap-6">
           <div className="flex flex-col text-center sm:text-left">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">
-            Tipu Burger & Broast
+            <h1 className="text-xl sm:text-2xl pt-4 md:text-3xl font-bold mb-1 sm:mb-2">
+              Tipu Burger & Broast
             </h1>
             <div className="flex flex-col gap-1.5">
               <div className="text-red-600 text-xs sm:text-sm md:text-base">
@@ -68,9 +67,7 @@ export default function Navbar() {
                     {branch?.name || "Select Location"}
                   </span>
                 </div>
-                <span
-                  className="underline text-[11px] sm:text-xs cursor-not-allowed opacity-50"
-                >
+                <span className="underline text-[11px] sm:text-xs cursor-not-allowed opacity-50">
                   {branch ? "Change Location" : "Choose Location"}
                 </span>
               </div>
@@ -102,23 +99,43 @@ export default function Navbar() {
           </div>
 
           <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-            {socialItems.map((item, index) => (
-              <Link
-                key={index}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${item.bg} rounded relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
-              >
-                <Image
-                  src={item.src}
-                  alt="Social"
-                  fill
-                  className="object-contain scale-90 p-1.5"
-                  sizes="(max-width: 640px) 32px, 40px"
-                />
-              </Link>
-            ))}
+            {socialItems.map((item, index) => {
+              if (item.src === "/download.webp") {
+                return (
+                  <a
+                    key={index}
+                    href={item.href}
+                    download
+                    className={`${item.bg} rounded-[9px] relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
+                  >
+                    <Image
+                      src={item.src}
+                      alt="Download PDF"
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 32px, 40px"
+                    />
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={index}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${item.bg} rounded relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
+                >
+                  <Image
+                    src={item.src}
+                    alt="Social"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 640px) 32px, 40px"
+                  />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

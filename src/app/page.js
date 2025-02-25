@@ -44,7 +44,7 @@ export default function Home() {
             aria-label="WhatsApp"
           >
             <img
-              src="/whatsapp-logo.png"
+              src="/whatsapp.png"
               alt="WhatsApp"
               className="w-10 h-10 object-contain"
             />

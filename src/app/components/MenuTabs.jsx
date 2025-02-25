@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useMenuStore } from '../../store/menu';
 import { useBranchStore } from '../../store/branchStore';
 
@@ -7,6 +7,7 @@ export default function MenuTabs() {
   const [subcategories, setSubcategories] = useState([]);
   const { activeCategory, activeSubcategory, setActiveCategory, setActiveSubcategory } = useMenuStore();
   const { branch } = useBranchStore(); 
+  const categoriesContainerRef = useRef(null);
 
   const getId = (idField) => {
     if (typeof idField === 'object' && idField !== null) {
@@ -14,6 +15,16 @@ export default function MenuTabs() {
       if (idField._id) return getId(idField._id);
     }
     return idField;
+  };
+
+  const scrollCategories = (direction) => {
+    if (categoriesContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      categoriesContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
@@ -96,7 +107,40 @@ export default function MenuTabs() {
 
   return (
     <>
-      <div className="bg-red-700">
+      <div className="bg-red-700 relative">
+        <div className="absolute right-4 top-[-29px] hidden md:flex items-center gap-[2px] z-10">
+          <button 
+            onClick={() => scrollCategories('left')} 
+            className="bg-red-700 rounded-full p-2 shadow-md focus:outline-none"
+            aria-label="Scroll left"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button 
+            onClick={() => scrollCategories('right')} 
+            className="bg-red-700 rounded-full p-2 shadow-md focus:outline-none"
+            aria-label="Scroll right"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             className="relative flex items-center overflow-x-auto py-3"
@@ -104,6 +148,7 @@ export default function MenuTabs() {
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
             }}
+            ref={categoriesContainerRef}
           >
             <style jsx>{`
               .no-scroll::-webkit-scrollbar {

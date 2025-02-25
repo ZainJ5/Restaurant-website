@@ -84,7 +84,7 @@ export default function Banner() {
           <img
             src={`/${bannerToShow}.webp`}
             alt={bannerAltText}
-            className="w-full h-auto object-contain"
+            className="w-full h-auto rounded-md object-contain"
             onLoad={handleImageLoad}
             onError={handleImageError}
           />
