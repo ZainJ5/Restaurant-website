@@ -29,15 +29,25 @@ function BannerSwiper() {
 export default function Hero() {
   const images = ['/hero.jpg', '/hero-2.jpg', '/hero-3.jpg']
   const [current, setCurrent] = useState(0)
+  const [previous, setPrevious] = useState(images.length - 1)
+  const [isAnimating, setIsAnimating] = useState(false)
   const [touchStartX, setTouchStartX] = useState(null)
   const [touchEndX, setTouchEndX] = useState(null)
 
   const nextImage = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setPrevious(current)
     setCurrent((prev) => (prev + 1) % images.length)
+    setTimeout(() => setIsAnimating(false), 1000) 
   }
 
   const prevImage = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setPrevious(current)
     setCurrent((prev) => (prev - 1 + images.length) % images.length)
+    setTimeout(() => setIsAnimating(false), 1000) 
   }
 
   useEffect(() => {
@@ -76,14 +86,33 @@ export default function Hero() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <Image src={images[current]} alt="Hero" fill priority />
+        <div
+          className={`absolute w-full h-full transition-transform duration-1000 ease-in-out ${
+            isAnimating ? 'translate-x-0' : ''
+          }`}
+        >
+          <Image src={images[current]} alt="Hero" fill priority />
+        </div>
 
-        {/* Dot navigation */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+        {isAnimating && (
+          <div
+            className="absolute w-full h-full transform -translate-x-full transition-transform duration-1000 ease-in-out"
+          >
+            <Image src={images[previous]} alt="Previous" fill className="object-cover" />
+          </div>
+        )}
+
+        <div className="absolute bottom-4 left-0 right-0 hidden md:flex justify-center space-x-2">
           {images.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => setCurrent(idx)}
+              onClick={() => {
+                if (isAnimating) return;
+                setPrevious(current);
+                setCurrent(idx);
+                setIsAnimating(true);
+                setTimeout(() => setIsAnimating(false), 1000); 
+              }}
               className={`w-3 h-3 rounded-full focus:outline-none ${
                 idx === current ? 'bg-red-600' : 'bg-gray-300'
               }`}
