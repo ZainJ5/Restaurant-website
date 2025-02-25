@@ -1,5 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import 'swiper/css'
+import 'swiper/css/pagination'
+import { Pagination } from 'swiper/modules'
 
 export default function Footer() {
   return (
@@ -73,19 +77,52 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Responsive row of 4 images (2 visible on small devices, all 4 on medium+) */}
-      <div className="flex flex-row justify-center gap-4 px-4 py-4">
-        <div className="relative w-1/2 md:w-1/4 h-56">
-          <Image src="/1.webp" alt="Image 1" layout="fill" objectFit="cover" />
+      {/* Responsive Image Slider on Small Devices */}
+      <div className="px-4 py-4">
+        <div className="block md:hidden">
+          <Swiper
+            spaceBetween={10}
+            slidesPerView={1}
+            pagination={{ clickable: true }}
+            modules={[Pagination]}
+          >
+            <SwiperSlide>
+              <div className="relative w-full h-56">
+                <Image src="/1.webp" alt="Image 1" layout="fill" objectFit="cover" />
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="relative w-full h-56">
+                <Image src="/2.webp" alt="Image 2" layout="fill" objectFit="cover" />
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="relative w-full h-56">
+                <Image src="/3.webp" alt="Image 3" layout="fill" objectFit="cover" />
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="relative w-full h-56">
+                <Image src="/4.webp" alt="Image 4" layout="fill" objectFit="cover" />
+              </div>
+            </SwiperSlide>
+          </Swiper>
         </div>
-        <div className="relative w-1/2 md:w-1/4 h-56">
-          <Image src="/2.webp" alt="Image 2" layout="fill" objectFit="cover" />
-        </div>
-        <div className="relative hidden md:block md:w-1/4 h-56">
-          <Image src="/3.webp" alt="Image 3" layout="fill" objectFit="cover" />
-        </div>
-        <div className="relative hidden md:block md:w-1/4 h-56">
-          <Image src="/4.webp" alt="Image 4" layout="fill" objectFit="cover" />
+
+        {/* Grid Layout for Medium+ Screens */}
+        <div className="hidden md:flex flex-row justify-center gap-4">
+          <div className="relative w-1/4 h-56">
+            <Image src="/1.webp" alt="Image 1" layout="fill" objectFit="cover" />
+          </div>
+          <div className="relative w-1/4 h-56">
+            <Image src="/2.webp" alt="Image 2" layout="fill" objectFit="cover" />
+          </div>
+          <div className="relative w-1/4 h-56">
+            <Image src="/3.webp" alt="Image 3" layout="fill" objectFit="cover" />
+          </div>
+          <div className="relative w-1/4 h-56">
+            <Image src="/4.webp" alt="Image 4" layout="fill" objectFit="cover" />
+          </div>
         </div>
       </div>
 
@@ -119,35 +156,13 @@ export default function Footer() {
           >
             <span
               className="absolute left-[6px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-cover bg-no-repeat"
-              style={{
-                backgroundImage:
-                  "url('https://4.bp.blogspot.com/-52U3eP2JDM4/WSkIT1vbUxI/AAAAAAAArQA/iF1BeARv2To-2FGQU7V6UbNPivuv_lccACLcB/s30/nexus2cee_ic_launcher_play_store_new-1.png')",
-              }}
+              style={{ backgroundImage: "url('/google-play.png')" }}
             ></span>
             <span className="absolute top-[5px] left-[40px] text-[10px] font-normal">
               GET IT ON
             </span>
             Google Play
           </Link>
-        </div>
-      </div>
-
-      <div className="bg-[rgb(76,76,76)] py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between text-sm text-white space-y-4 sm:space-y-0">
-            <p>Powered by DevX.</p>
-            <div className="space-x-4">
-              <Link href="/terms" className="hover:underline">
-                Terms &amp; Conditions
-              </Link>
-              <Link href="/privacy-policy" className="hover:underline">
-                Privacy Policy
-              </Link>
-              <Link href="/refund-policy" className="hover:underline">
-                Returns &amp; Refund
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </footer>

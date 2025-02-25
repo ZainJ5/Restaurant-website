@@ -148,26 +148,34 @@ export default function MenuTabs() {
       {filteredSubcategories.length > 0 && (
         <div className="bg-white py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center gap-3 sm:gap-4">
-              {filteredSubcategories.map((sub) => {
-                const subId = getId(sub._id);
-                return (
-                  <button
-                    key={subId}
-                    onClick={() => {
-                      console.log('User selected active subcategory:', subId);
-                      setActiveSubcategory(subId);
-                    }}
-                    className={`${
-                      activeSubcategory === subId
-                        ? 'bg-black text-white hover:bg-gray-800'
-                        : 'border border-black text-black hover:bg-gray-50'
-                    } px-5 sm:px-6 py-1 rounded-2xl font-medium text-sm sm:text-[15px] transition-colors`}
-                  >
-                    {sub.name.toUpperCase()}
-                  </button>
-                );
-              })}
+            <div 
+              className="relative flex overflow-x-auto"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              <div className="flex items-center gap-3 sm:gap-4 mx-auto no-scroll">
+                {filteredSubcategories.map((sub) => {
+                  const subId = getId(sub._id);
+                  return (
+                    <button
+                      key={subId}
+                      onClick={() => {
+                        console.log('User selected active subcategory:', subId);
+                        setActiveSubcategory(subId);
+                      }}
+                      className={`${
+                        activeSubcategory === subId
+                          ? 'bg-black text-white hover:bg-gray-800'
+                          : 'border border-black text-black hover:bg-gray-50'
+                      } px-5 sm:px-6 py-1 rounded-2xl font-medium text-sm sm:text-[15px] transition-colors whitespace-nowrap shrink-0`}
+                    >
+                      {sub.name.toUpperCase()}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
