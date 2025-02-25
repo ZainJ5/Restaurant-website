@@ -37,7 +37,7 @@ function FadeImage({ src, alt, animateIn, animateOut, onAnimationEnd }) {
 
 function  BannerSwiper() {
   const banners = [
-    'Welcome Restaurant Name',
+    'Welcome Tipu Burger & Broast',
     'Flat 10% Off on all Items',
     'Discover Our Special Dishes',
   ]
