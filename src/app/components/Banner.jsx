@@ -47,14 +47,17 @@ export default function Banner() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
       {activeCategoryName ? (
-        <div className="h-16 sm:h-20 flex items-center justify-center bg-gradient-to-r from-red-800 to-red-600 rounded-md shadow-md">
-          <h1 className="text-white text-4xl sm:text-5xl font-bold">
-            {activeCategoryName}
-          </h1>
+        <div className="relative w-full aspect-[1500/287]"> 
+
+          <img
+            src={`/${activeCategoryName}.webp`}
+            alt={`${activeCategoryName} banner`}
+            className="absolute inset-0 w-full h-full object-contain"
+          />
         </div>
       ) : (
         <div className="h-16 sm:h-20 flex items-center justify-center bg-gray-200 rounded-md shadow-md">
-          <h1 className="text-black text-4xl sm:text-5xl font-bold">
+          <h1 className="text-black text-xl sm:text-2xl font-bold">
             Loading...
           </h1>
         </div>

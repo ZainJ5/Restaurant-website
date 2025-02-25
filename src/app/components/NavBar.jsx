@@ -30,20 +30,29 @@ export default function Navbar() {
     setIsModalOpen(false);
   };
 
-  return (
-<div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
-  <div className="flex justify-center sm:justify-start">
-    <div className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full border-[3px] sm:border-4 border-yellow-400 overflow-hidden -mt-8 sm:-mt-10 md:-mt-14">
-      <Image src="/logo.png" alt="Logo" fill className="object-cover" />
-    </div>
-  </div>
+  const socialItems = [
+    { src: "/download.png", bg: "bg-red-700", href: "#" },
+    { src: whatsapp.src, bg: "bg-[rgb(42,168,26)]", href: "https://wa.me/923332245706" },
+    { src: "/phone.png", bg: "bg-blue-500", href: "tel:+92111822111" },
+    { src: "/facebook.png", bg: "bg-[rgb(12,144,242)]", href: "https://www.facebook.com/tipuburgerbroast" },
+    { src: "/instagram.png", bg: "bg-black", href: "https://www.tiktok.com/tipuburger" },
+  ];
 
+  return (
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
+      <div className="flex justify-center sm:justify-start">
+        <Link href="/">
+          <div className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full border-[3px] sm:border-4 border-yellow-400 overflow-hidden -mt-8 sm:-mt-10 md:-mt-14">
+            <Image src="/logo.png" alt="Logo" fill className="object-cover" />
+          </div>
+        </Link>
+      </div>
 
       <div className="pb-2 md:pb-4">
         <div className="flex flex-col sm:flex-row sm:flex-wrap justify-between items-center gap-4 sm:gap-6">
           <div className="flex flex-col text-center sm:text-left">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">
-              Restaurant Name
+            Tipu Burger & Broast
             </h1>
             <div className="flex flex-col gap-1.5">
               <div className="text-red-600 text-xs sm:text-sm md:text-base">
@@ -60,8 +69,7 @@ export default function Navbar() {
                   </span>
                 </div>
                 <span
-                  onClick={() => setIsModalOpen(true)}
-                  className="underline hover:text-red-700 text-[11px] sm:text-xs cursor-pointer"
+                  className="underline text-[11px] sm:text-xs cursor-not-allowed opacity-50"
                 >
                   {branch ? "Change Location" : "Choose Location"}
                 </span>
@@ -94,19 +102,12 @@ export default function Navbar() {
           </div>
 
           <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-            {[
-              { src: "/download.png", bg: "bg-red-700" },
-              { src: whatsapp.src, bg: "bg-[rgb(42,168,26)]" },
-              { src: "/phone.png", bg: "bg-blue-500" },
-              { src: "/facebook.png", bg: "bg-[rgb(12,144,242)]" },
-              {
-                src: "/instagram.png",
-                bg: "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500",
-              },
-            ].map((item, index) => (
+            {socialItems.map((item, index) => (
               <Link
                 key={index}
-                href="#"
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`${item.bg} rounded relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
               >
                 <Image

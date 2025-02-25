@@ -5,17 +5,24 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t">
       <div className="max-w-7xl mx-auto px-4 pb-12 sm:px-6 lg:px-8 relative">
-        <div className="relative rounded-full border-4 border-yellow-400 w-32 h-32 
-                        bg-white absolute left-1/2 top-[0px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
-          <Image src="/logo.png" alt="Logo" layout="fill" objectFit="cover" />
-        </div>
+        <Link href="/">
+          <div className="relative rounded-full border-4 border-yellow-400 w-32 h-32 
+                          bg-white absolute left-1/2 top-[0px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
+            <Image src="/logo.png" alt="Logo" layout="fill" objectFit="cover" />
+          </div>
+        </Link>
 
         <div className="text-center mt-[-50px]">
-          <h2 className="text-2xl font-bold">Restaurant Name</h2>
+          <h2 className="text-2xl font-bold">Tipu Burger &amp; Broast</h2>
 
           <p className="mt-2">
-            <Link href="#" className="text-blue-600 hover:underline">
-              Location Address Complete with google map link
+            <Link
+              href="https://maps.app.goo.gl/iLFtzPRK4iR1Yc9P9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Clifton Center، Shop No 1, Clifton Shopping Arcade، Bank Road, Block 5 Clifton, Karachi, 75600
             </Link>
           </p>
 
@@ -28,12 +35,34 @@ export default function Footer() {
           <div className="mt-8 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-12">
             <div>
               <h3 className="font-semibold">UAN Number</h3>
-              <p>021-111 222 3333</p>
+              <p>
+                <a href="tel:+92111822111" className="hover:underline">
+                  021 - 111 822 111
+                </a>
+              </p>
             </div>
 
             <div className="sm:border-x sm:px-8 sm:border-x-gray-500">
               <h3 className="font-semibold">WhatsApp</h3>
-              <p>0300 123 4567</p>
+              <div className="flex items-center space-x-1">
+                <a
+                  href="https://wa.me/923332245706"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  0333 2245706
+                </a>
+                <span>/</span>
+                <a
+                  href="https://wa.me/923463332682"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  0346 3332682
+                </a>
+              </div>
             </div>
 
             <div>
@@ -44,13 +73,21 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="flex w-full h-56">
-        <div className="bg-blue-600 flex-1"></div>
-        <div className="bg-red-600 flex-1"></div>
-        <div className="bg-yellow-500 flex-1 hidden sm:block"></div>
-        <div className="bg-green-500 flex-1 hidden sm:block"></div>
+      {/* Responsive row of 4 images (2 visible on small devices, all 4 on medium+) */}
+      <div className="flex flex-row justify-center gap-4 px-4 py-4">
+        <div className="relative w-1/2 md:w-1/4 h-56">
+          <Image src="/1.webp" alt="Image 1" layout="fill" objectFit="cover" />
+        </div>
+        <div className="relative w-1/2 md:w-1/4 h-56">
+          <Image src="/2.webp" alt="Image 2" layout="fill" objectFit="cover" />
+        </div>
+        <div className="relative hidden md:block md:w-1/4 h-56">
+          <Image src="/3.webp" alt="Image 3" layout="fill" objectFit="cover" />
+        </div>
+        <div className="relative hidden md:block md:w-1/4 h-56">
+          <Image src="/4.webp" alt="Image 4" layout="fill" objectFit="cover" />
+        </div>
       </div>
-
 
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center py-12 sm:px-6 lg:px-8 text-center space-y-8 sm:space-y-0">
         <h3 className="text-3xl pl-8 font-bold">Download Our App!</h3>
@@ -59,6 +96,7 @@ export default function Footer() {
           <Link
             href="https://restaurant-website-pi-rouge.vercel.app/"
             target="_blank"
+            rel="noopener noreferrer"
             title="Download on the App Store"
             className="relative inline-block m-[5px] pt-[15px] pr-[16px] pb-[5px] pl-[40px] text-lg leading-[1.33] rounded-md whitespace-nowrap cursor-pointer select-none border border-black font-semibold bg-[#111] text-white no-underline hover:bg-[#2c2b2b] focus:bg-[#555] active:bg-[#555] focus:outline-none"
           >
@@ -75,6 +113,7 @@ export default function Footer() {
           <Link
             href="https://restaurant-website-pi-rouge.vercel.app/"
             target="_blank"
+            rel="noopener noreferrer"
             title="Google Play"
             className="relative inline-block m-[5px] pt-[15px] pr-[16px] pb-[5px] pl-[40px] text-lg leading-[1.33] rounded-md whitespace-nowrap cursor-pointer select-none border border-black font-semibold bg-[#111] text-white no-underline hover:bg-[#2c2b2b] focus:bg-[#555] active:bg-[#555] focus:outline-none"
           >
@@ -96,7 +135,7 @@ export default function Footer() {
       <div className="bg-[rgb(76,76,76)] py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between text-sm text-white space-y-4 sm:space-y-0">
-            <p>Powered by Name.</p>
+            <p>Powered by DevX.</p>
             <div className="space-x-4">
               <Link href="/terms" className="hover:underline">
                 Terms &amp; Conditions

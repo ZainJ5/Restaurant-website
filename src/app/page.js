@@ -18,7 +18,7 @@ export default function Home() {
 
   const handleWhatsAppClick = () => {
     window.open(
-      "https://wa.me/9999999999?text=Hello%20from%20the%20Restaurant!",
+      "https://wa.me/923463332682",
       "_blank"
     );
   };

@@ -1,208 +1,132 @@
 import os
-import webbrowser
-from datetime import datetime
-import pyautogui
 import time
-from PIL import ImageGrab
-import cv2
-import numpy as np
-import logging
-from pathlib import Path
-import subprocess
-import re
+import tempfile
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 
-class ZoomMeetingBot:
-    def __init__(self, meeting_id, password=None, save_dir="recordings"):
-        self.meeting_id = re.sub(r'\s+', '', meeting_id)
-        self.password = password
-        self.save_dir = Path(save_dir)
-        self.save_dir.mkdir(exist_ok=True)
+class JoinZoomMeeting:
+    def __init__(self):
+        print("Initializing JoinZoomMeeting class...")
         
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s'
-        )
-        self.logger = logging.getLogger(__name__)
+        # Prompt user for meeting details
+        self.meeting_id = input("Enter Zoom Meeting ID: ")
+        self.passcode = input("Enter Zoom Meeting Passcode: ")
+        self.display_name = input("Enter display name (default: ZoomUser): ") or "ZoomUser"
         
-        self.zoom_paths = {
-            'windows': [
-                r"C:\Users\%USERNAME%\AppData\Roaming\Zoom\bin\Zoom.exe",
-                r"C:\Program Files\Zoom\bin\Zoom.exe",
-                r"C:\Program Files (x86)\Zoom\bin\Zoom.exe"
-            ]
-        }
-
-    def find_zoom_exe(self):
-        if os.name == 'nt':
-            for path in self.zoom_paths['windows']:
-                expanded_path = os.path.expandvars(path)
-                if os.path.exists(expanded_path):
-                    return expanded_path
-        return None
-
-    def start_zoom(self):
-        try:
-            if os.name == 'nt':
-                os.system('taskkill /f /im Zoom.exe >nul 2>&1')
-                time.sleep(2)
-            
-            zoom_path = self.find_zoom_exe()
-            if zoom_path:
-                subprocess.Popen([zoom_path])
-                self.logger.info(f"Starting Zoom from: {zoom_path}")
-                time.sleep(5)
-                return True
-            else:
-                self.logger.error("Zoom executable not found!")
-                return False
-        except Exception as e:
-            self.logger.error(f"Failed to start Zoom: {str(e)}")
-            return False
-
-    def handle_join_process(self):
-        """Handle the initial join process including video/audio settings"""
-        try:
-            # Wait for the video preview window
-            time.sleep(3)
-            
-            # Turn off video if it's on (Alt+V)
-            pyautogui.hotkey('alt', 'v')
-            time.sleep(1)
-            
-            # Press Tab multiple times to reach the Join button
-            # The number of tabs needed might vary depending on your Zoom version
-            for _ in range(4):
-                pyautogui.press('tab')
-                time.sleep(0.5)
-            
-            # Press Enter to click the Join button
-            pyautogui.press('enter')
-            time.sleep(3)
-            
-            # Handle the audio join prompt
-            # Press Alt+J to join audio
-            pyautogui.hotkey('alt', 'j')
-            time.sleep(2)
-            
-            # Sometimes there's a "Join Computer Audio" button
-            pyautogui.press('enter')
-            time.sleep(1)
-            
-            return True
-        except Exception as e:
-            self.logger.error(f"Error during join process: {str(e)}")
-            return False
+        # Print the inputs for debug
+        print(f"[DEBUG] Meeting ID: {self.meeting_id}")
+        print(f"[DEBUG] Passcode: {self.passcode}")
+        print(f"[DEBUG] Display name: {self.display_name}")
+        
+        # Configure Chrome options
+        print("[DEBUG] Setting up Chrome driver options...")
+        opt = Options()
+        opt.add_argument('--disable-blink-features=AutomationControlled')
+        opt.add_argument('--start-maximized')
+        opt.add_experimental_option("prefs", {
+            "profile.default_content_setting_values.media_stream_mic": 1,
+            "profile.default_content_setting_values.media_stream_camera": 1,
+            "profile.default_content_setting_values.geolocation": 0,
+            "profile.default_content_setting_values.notifications": 1
+        })
+        
+        # Launch browser
+        print("[DEBUG] Launching Chrome browser...")
+        self.driver = webdriver.Chrome(options=opt)
+        
+        # Initialize WebDriverWait
+        print("[DEBUG] Initializing WebDriverWait...")
+        self.wait = WebDriverWait(self.driver, 20)
 
     def join_meeting(self):
+        print("[DEBUG] Entering join_meeting method...")
         try:
-            # Construct join URL
-            join_url = f"zoommtg://zoom.us/join?action=join&confno={self.meeting_id}"
-            if self.password:
-                join_url += f"&pwd={self.password}"
+            # Navigate to Zoom join URL
+            zoom_url = f"https://zoom.us/wc/join/{self.meeting_id}"
+            print(f"[DEBUG] Navigating to Zoom URL: {zoom_url}")
+            self.driver.get(zoom_url)
             
-            self.logger.info(f"Attempting to join meeting with ID: {self.meeting_id}")
+            # Attempt passcode entry if prompted
+            try:
+                print("[DEBUG] Checking for passcode field...")
+                passcode_field = self.wait.until(EC.presence_of_element_located((By.ID, "inputpasscode")))
+                passcode_field.clear()
+                passcode_field.send_keys(self.passcode)
+                print("[DEBUG] Passcode entered.")
+                
+                join_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn')))
+                join_button.click()
+                print("[DEBUG] Clicked join button after passcode.")
+            except TimeoutException:
+                print("[DEBUG] Passcode field not found. Possibly no passcode required or already passed this step.")
             
-            # Open the join URL
-            webbrowser.open(join_url)
+            # Attempt name entry if prompted
+            try:
+                print("[DEBUG] Checking for name field...")
+                name_field = self.wait.until(EC.presence_of_element_located((By.ID, "inputname")))
+                name_field.clear()
+                name_field.send_keys(self.display_name)
+                print("[DEBUG] Display name entered.")
+                
+                name_join_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn')))
+                name_join_button.click()
+                print("[DEBUG] Clicked join button after name entry.")
+            except TimeoutException:
+                print("[DEBUG] Name field not found. Possibly already logged in or name not required.")
+            
+            # Wait a bit for Zoom interface to load
+            print("[DEBUG] Waiting briefly for Zoom interface to initialize...")
             time.sleep(5)
+            print("[DEBUG] Finished join_meeting method.")
             
-            # Handle the join process
-            if self.handle_join_process():
-                self.logger.info("Successfully completed join process")
-                
-                # Maximize window
-                time.sleep(2)
-                pyautogui.hotkey('alt', 'f')
-                time.sleep(1)
-                pyautogui.press('x')
-                
-                return True
-            else:
-                self.logger.error("Failed to complete join process")
-                return False
-                
         except Exception as e:
-            self.logger.error(f"Failed to join meeting: {str(e)}")
-            return False
+            print(f"[ERROR] Failed to join Zoom meeting: {str(e)}")
+            raise
 
-    def start_recording(self):
+    def turn_off_mic_cam(self):
+        print("[DEBUG] Entering turn_off_mic_cam method...")
+        
+        # These selectors may change depending on Zoom updates
         try:
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = self.save_dir / f"meeting_recording_{timestamp}.avi"
-            
-            screen = ImageGrab.grab()
-            width, height = screen.size
-            
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            out = cv2.VideoWriter(str(filename), fourcc, 20.0, (width, height))
-            
-            self.logger.info(f"Started recording to {filename}")
-            return out
-        except Exception as e:
-            self.logger.error(f"Failed to start recording: {str(e)}")
-            return None
-
-    def record_meeting(self, duration_minutes):
-        out = self.start_recording()
-        if not out:
-            return False
-
+            print("[DEBUG] Locating microphone button...")
+            mic_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Mute"]')))
+            mic_button.click()
+            print("[DEBUG] Microphone turned off.")
+        except (TimeoutException, NoSuchElementException) as e:
+            print(f"[DEBUG] Unable to turn off microphone: {str(e)}")
+        
         try:
-            end_time = time.time() + (duration_minutes * 60)
-            self.logger.info(f"Recording will stop in {duration_minutes} minutes")
-            last_log_time = time.time()
-            
-            while time.time() < end_time:
-                screenshot = ImageGrab.grab()
-                frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
-                out.write(frame)
-                
-                # Log remaining time every minute
-                current_time = time.time()
-                if current_time - last_log_time >= 60:
-                    minutes_left = int((end_time - current_time) / 60)
-                    self.logger.info(f"{minutes_left} minutes remaining in recording")
-                    last_log_time = current_time
-                
-                time.sleep(0.05)
-                
-            out.release()
-            self.logger.info("Recording completed successfully")
-            return True
-        except Exception as e:
-            self.logger.error(f"Error during recording: {str(e)}")
-            if out:
-                out.release()
-            return False
-
-    def leave_meeting(self):
-        try:
-            pyautogui.hotkey('alt', 'q')
-            time.sleep(2)
-            pyautogui.press('enter')
-            
-            self.logger.info("Successfully left meeting")
-            return True
-        except Exception as e:
-            self.logger.error(f"Failed to leave meeting: {str(e)}")
-            return False
+            print("[DEBUG] Locating camera button...")
+            cam_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Stop Video"]')))
+            cam_button.click()
+            print("[DEBUG] Camera turned off.")
+        except (TimeoutException, NoSuchElementException) as e:
+            print(f"[DEBUG] Unable to turn off camera: {str(e)}")
 
 def main():
-    # Replace these with your actual meeting details
-    meeting_id = "863 8937 6384"
-    password = "a64nTK"      # Your meeting password (if required)
-    duration_minutes = 60          # Duration to record
+    print("[DEBUG] Starting main function...")
+    temp_dir = tempfile.mkdtemp()
+    print(f"[DEBUG] Temporary directory created at: {temp_dir}")
     
-    bot = ZoomMeetingBot(meeting_id, password)
-    
-    if bot.start_zoom():
-        time.sleep(5)  # Give Zoom time to fully start
-        if bot.join_meeting():
-            time.sleep(3)  # Wait for meeting to stabilize
-            bot.record_meeting(duration_minutes)
-            bot.leave_meeting()
-        else:
-            bot.logger.error("Failed to join the meeting - please check your meeting ID and password")
+    try:
+        zoom_obj = JoinZoomMeeting()
+        zoom_obj.join_meeting()
+        zoom_obj.turn_off_mic_cam()
+        print("[DEBUG] Meeting flow completed.")
+        
+    except Exception as e:
+        print(f"[ERROR] An error occurred: {str(e)}")
+    finally:
+        # Clean up if needed
+        print("[DEBUG] Cleaning up temporary directory.")
+        time.sleep(2)
+        os.rmdir(temp_dir)
+        print("[DEBUG] Main function finished.")
 
 if __name__ == "__main__":
     main()
