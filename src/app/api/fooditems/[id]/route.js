@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/app/lib/mongoose";
 import FoodItem from "@/app/models/FoodItem";
+import Category from "@/app/models/Category"; 
+import Subcategory from "@/app/models/Subcategory";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/app/lib/firebase";
 
@@ -36,6 +38,17 @@ export async function PATCH(request, context) {
     const subcategory = formData.get("subcategory");
     const branch = formData.get("branch");
 
+    if (category) {
+      const subcategoriesCount = await Subcategory.countDocuments({ category });
+      
+      if (subcategoriesCount > 0 && (!subcategory || subcategory === "")) {
+        return NextResponse.json(
+          { message: "Subcategory is required for this category" },
+          { status: 400 }
+        );
+      }
+    }
+
     let variationsParsed = [];
     const variations = formData.get("variations");
     if (variations) {
@@ -64,10 +77,15 @@ export async function PATCH(request, context) {
       title,
       description,
       category,
-      subcategory,
       branch,
       variations: variationsParsed,
     };
+
+    if (subcategory && subcategory !== "") {
+      updateData.subcategory = subcategory;
+    } else {
+      updateData.subcategory = null;
+    }
 
     if (imageUrl) {
       updateData.imageUrl = imageUrl;

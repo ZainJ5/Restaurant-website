@@ -21,6 +21,9 @@ export default function AddFoodItemForm({
   const [variations, setVariations] = useState([]);
   const [variationName, setVariationName] = useState("");
   const [variationPrice, setVariationPrice] = useState("");
+  
+  // New state to track if the selected category has subcategories
+  const [categoryHasSubcategories, setCategoryHasSubcategories] = useState(false);
 
   useEffect(() => {
     if (variations.length > 0) {
@@ -39,11 +42,13 @@ export default function AddFoodItemForm({
       setSelectedCategoryId("");
       setFilteredSubcategories([]);
       setSelectedSubcategoryId("");
+      setCategoryHasSubcategories(false);
     } else {
       setFilteredCategories([]);
       setSelectedCategoryId("");
       setFilteredSubcategories([]);
       setSelectedSubcategoryId("");
+      setCategoryHasSubcategories(false);
     }
   }, [selectedBranchId, categories]);
 
@@ -56,9 +61,13 @@ export default function AddFoodItemForm({
       });
       setFilteredSubcategories(filtered);
       setSelectedSubcategoryId("");
+      
+      // Check if the selected category has any subcategories
+      setCategoryHasSubcategories(filtered.length > 0);
     } else {
       setFilteredSubcategories([]);
       setSelectedSubcategoryId("");
+      setCategoryHasSubcategories(false);
     }
   }, [selectedCategoryId, subcategories]);
 
@@ -84,22 +93,40 @@ export default function AddFoodItemForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !selectedBranchId ||
-      !selectedCategoryId ||
-      !selectedSubcategoryId ||
-      !title.trim() ||
-      !foodImageFile ||
-      (variations.length === 0 && !price)
-    ) {
-      toast.error("Please fill in all mandatory fields.");
+    // Check if subcategory is required but not selected
+    if (categoryHasSubcategories && !selectedSubcategoryId) {
+      toast.error("This category has subcategories. Please select a subcategory.");
+      return;
+    }
+
+    // Check for mandatory fields
+    const missingMandatory = !selectedBranchId || 
+                             !selectedCategoryId || 
+                             !title.trim() || 
+                             !foodImageFile || 
+                             (variations.length === 0 && !price);
+
+    if (missingMandatory) {
+      // Create a more specific error message
+      let errorMsg = "Please fill in all mandatory fields: ";
+      const missing = [];
+      if (!selectedBranchId) missing.push("Branch");
+      if (!selectedCategoryId) missing.push("Category");
+      if (!title.trim()) missing.push("Item Title");
+      if (!foodImageFile) missing.push("Food Image");
+      if (variations.length === 0 && !price) missing.push("Price");
+      
+      errorMsg += missing.join(", ");
+      toast.error(errorMsg);
       return;
     }
 
     const formData = new FormData();
     formData.append("branch", selectedBranchId);
     formData.append("category", selectedCategoryId);
-    formData.append("subcategory", selectedSubcategoryId);
+    if (selectedSubcategoryId) {
+      formData.append("subcategory", selectedSubcategoryId);
+    }
     formData.append("title", title.trim());
     formData.append("description", description.trim());
     if (variations.length === 0) {
@@ -113,6 +140,7 @@ export default function AddFoodItemForm({
     try {
       await addFoodItem(formData);
       toast.success("Food item added successfully!");
+      // Reset form after successful submission
       setSelectedBranchId("");
       setSelectedCategoryId("");
       setSelectedSubcategoryId("");
@@ -123,6 +151,7 @@ export default function AddFoodItemForm({
       setVariations([]);
     } catch (error) {
       toast.error("Error adding food item: " + error.message);
+      console.error("Form submission error:", error);
     }
   };
 
@@ -164,21 +193,34 @@ export default function AddFoodItemForm({
       </div>
 
       <div>
-        <label className="block font-medium mb-1">Select Subcategory</label>
+        <label className="block font-medium mb-1">
+          {categoryHasSubcategories 
+            ? "Select Subcategory (Required)" 
+            : "Select Subcategory (Optional)"}
+        </label>
         <select
-          required
           value={selectedSubcategoryId}
           onChange={(e) => setSelectedSubcategoryId(e.target.value)}
           className="w-full border rounded p-2"
           disabled={!selectedCategoryId}
+          required={categoryHasSubcategories}
         >
-          <option value="">-- Select Subcategory --</option>
+          <option value="">
+            {categoryHasSubcategories 
+              ? "-- Select Subcategory --" 
+              : "-- Select Subcategory (Optional) --"}
+          </option>
           {filteredSubcategories.map((sub) => (
             <option key={sub._id} value={sub._id}>
               {sub.name}
             </option>
           ))}
         </select>
+        {categoryHasSubcategories && (
+          <p className="text-sm text-red-600">
+            This category has subcategories. You must select one.
+          </p>
+        )}
       </div>
 
       <div>

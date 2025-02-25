@@ -49,10 +49,13 @@ export async function POST(request) {
       description,
       imageUrl,
       category,
-      subcategory,
       branch,
       variations: variationsParsed,
     };
+
+    if (subcategory) {
+      foodItemData.subcategory = subcategory;
+    }
 
     if (!variationsParsed.length) {
       foodItemData.price = Number(price);

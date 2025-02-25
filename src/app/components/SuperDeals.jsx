@@ -52,15 +52,21 @@ export default function SuperDeals({ searchQuery }) {
   const lowerQuery = searchQuery.toLowerCase();
 
   const filteredItems = items.filter((item) => {
+    // Check for category match - required if activeCategory is set
     const itemCategory = getId(item.category);
-    const categoryMatch = activeCategory ? itemCategory === activeCategory : false;
+    const categoryMatch = activeCategory ? itemCategory === activeCategory : true;
+    
+    // Check for subcategory match - only required if activeSubcategory is set
     const itemSubcategory = getId(item.subcategory);
-    const subcategoryMatch = activeSubcategory ? itemSubcategory === activeSubcategory : false;
+    const subcategoryMatch = activeSubcategory ? itemSubcategory === activeSubcategory : true;
+    
+    // Search query matching
     const titleMatch = item.title.toLowerCase().includes(lowerQuery);
     const itemsMatch =
       item.items &&
       Array.isArray(item.items) &&
       item.items.some((i) => i.toLowerCase().includes(lowerQuery));
+    
     return categoryMatch && subcategoryMatch && (titleMatch || itemsMatch);
   });
 

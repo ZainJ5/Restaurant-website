@@ -13,16 +13,23 @@ export const useCartStore = create((set, get) => ({
       
       if (index === -1) {
         return {
-          items: [...state.items, { ...deal, quantity: 1 }],
+          items: [
+            ...state.items,
+            { ...deal, quantity: 1, title: `${deal.title} x1` }
+          ],
           total: state.total + Number(deal.price),
           itemCount: state.itemCount + 1,
         };
       }
       
       const newItems = [...state.items];
+      const currentQuantity = newItems[index].quantity || 1;
+      const newQuantity = currentQuantity + 1;
+      const baseTitle = newItems[index].title.split(" x")[0];
       newItems[index] = {
         ...newItems[index],
-        quantity: newItems[index].quantity + 1,
+        quantity: newQuantity,
+        title: `${baseTitle} x${newQuantity}`,
       };
       
       return {
@@ -32,18 +39,19 @@ export const useCartStore = create((set, get) => ({
       };
     }),
 
-  updateItemQuantity: (index, newQuantity) =>
+  updateItemQuantity: (index, newQuantity) => {
+    if (newQuantity < 1) {
+      return get().removeFromCart(index);
+    }
     set((state) => {
-      if (newQuantity < 1) {
-        return get().removeFromCart(index);
-      }
-      
       const newItems = [...state.items];
-      const oldQuantity = newItems[index].quantity;
+      const oldQuantity = newItems[index].quantity || 1;
       const priceDifference = (newQuantity - oldQuantity) * Number(newItems[index].price);
+      const baseTitle = newItems[index].title.split(" x")[0];
       newItems[index] = {
         ...newItems[index],
         quantity: newQuantity,
+        title: `${baseTitle} x${newQuantity}`,
       };
       
       return {
@@ -51,7 +59,8 @@ export const useCartStore = create((set, get) => ({
         total: state.total + priceDifference,
         itemCount: state.itemCount + (newQuantity - oldQuantity),
       };
-    }),
+    });
+  },
 
   removeFromCart: (index) =>
     set((state) => {
