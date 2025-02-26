@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay } from 'swiper/modules'
 import 'swiper/css'
 
 export default function Footer() {
@@ -79,6 +80,11 @@ export default function Footer() {
         <Swiper
           spaceBetween={0}
           slidesPerView={2}
+          modules={[Autoplay]}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+          }}
           breakpoints={{
             768: { slidesPerView: 4 },
           }}
