@@ -1,10 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import SwiperCore, { Autoplay } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay } from 'swiper'
 import 'swiper/css'
-
-SwiperCore.use([Autoplay])
 
 export default function Footer() {
   return (
@@ -84,7 +82,7 @@ export default function Footer() {
           loop={true}
           speed={2000}
           autoplay={{
-            delay: 2500, // 2.5 seconds pause between transitions
+            delay: 0,
             disableOnInteraction: false,
           }}
           breakpoints={{
