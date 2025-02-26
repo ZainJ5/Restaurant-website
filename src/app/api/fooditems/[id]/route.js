@@ -6,10 +6,10 @@ import Subcategory from "@/app/models/Subcategory";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/app/lib/firebase";
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await context.params;
     const foodItem = await FoodItem.findById(id);
     if (!foodItem) {
       return NextResponse.json({ message: "Item not found" }, { status: 404 });
@@ -21,6 +21,7 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ message: "Failed to delete item" }, { status: 500 });
   }
 }
+
 
 export async function PATCH(request, context) {
   try {

@@ -96,44 +96,44 @@ export default function Footer() {
           allowTouchMove={true}
         >
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/1.webp" alt="Image 1" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/1.webp" alt="Image 1" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/2.webp" alt="Image 2" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/2.webp" alt="Image 2" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/3.webp" alt="Image 3" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/3.webp" alt="Image 3" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/4.webp" alt="Image 4" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/4.webp" alt="Image 4" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           {/* Duplicate slides to ensure continuous movement */}
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/1.webp" alt="Image 1" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/1.webp" alt="Image 1" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/2.webp" alt="Image 2" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/2.webp" alt="Image 2" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/3.webp" alt="Image 3" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/3.webp" alt="Image 3" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-48 md:h-56">
-              <img src="/4.webp" alt="Image 4" className="w-full h-full object-cover object-center" />
+            <div className="relative w-full h-56">
+              <img src="/4.webp" alt="Image 4" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             </div>
           </SwiperSlide>
         </Swiper>

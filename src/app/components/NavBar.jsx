@@ -130,7 +130,7 @@ export default function Navbar() {
                   <img
                     src={item.src}
                     alt="Social icon"
-                    className="w-full h-full rounded-[7px] object-contain"
+                    className="w-full h-full object-contain"
                   />
                 </Link>
               );

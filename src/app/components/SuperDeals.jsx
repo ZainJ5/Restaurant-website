@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { useCartStore } from '../../store/cart';
 import { useMenuStore } from '../../store/menu';
 import { toast } from 'react-toastify';
@@ -156,11 +155,10 @@ export default function SuperDeals({ searchQuery }) {
                   style={{ position: 'relative' }}
                 >
                   {item.imageUrl && item.imageUrl !== '' ? (
-                    <Image
+                    <img
                       src={item.imageUrl}
                       alt={item.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -224,11 +222,10 @@ export default function SuperDeals({ searchQuery }) {
                 style={{ position: 'relative' }}
               >
                 {selectedItem.imageUrl && selectedItem.imageUrl !== '' ? (
-                  <Image
+                  <img
                     src={selectedItem.imageUrl}
                     alt={selectedItem.title}
-                    fill
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                     className="rounded"
                   />
                 ) : (

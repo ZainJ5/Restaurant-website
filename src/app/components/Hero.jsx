@@ -90,14 +90,24 @@ export default function Hero() {
             isAnimating ? 'translate-x-0' : ''
           }`}
         >
-          <img src={images[current]} alt="Hero" className="w-full h-full object-cover" style={{position: 'absolute'}} />
+          <img 
+            src={images[current]} 
+            alt="Hero" 
+            className="w-full h-full object-contain"
+            style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          />
         </div>
 
         {isAnimating && (
           <div
             className="absolute w-full h-full transform -translate-x-full transition-transform duration-1000 ease-in-out"
           >
-            <img src={images[previous]} alt="Previous" className="w-full h-full object-cover" style={{position: 'absolute'}} />
+            <img 
+              src={images[previous]} 
+              alt="Previous" 
+              className="w-full h-full object-contain"
+              style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+            />
           </div>
         )}
 
