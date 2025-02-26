@@ -114,7 +114,7 @@ const socialItems = [
                       src={item.src}
                       alt="Download PDF"
                       fill
-                      className="object-contain"
+                    className="object-contain rounded-[7px]"
                       sizes="(max-width: 640px) 32px, 40px"
                     />
                   </a>
