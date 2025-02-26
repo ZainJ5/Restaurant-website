@@ -1,7 +1,6 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper'
+import { Autoplay } from 'swiper/modules'
 import 'swiper/css'
 
 export default function Footer() {
@@ -11,12 +10,13 @@ export default function Footer() {
         <Link href="/">
           <div className="relative rounded-full border-4 border-yellow-400 w-32 h-32 
                           bg-white absolute left-1/2 top-[0px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
-            <Image src="/logo.png" alt="Logo" layout="fill" objectFit="cover" />
+            <img src="/logo.png" alt="Logo" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
           </div>
         </Link>
 
         <div className="text-center mt-[-50px]">
           <h2 className="text-2xl font-bold">Tipu Burger &amp; Broast</h2>
+
           <p className="mt-2">
             <Link
               href="https://maps.app.goo.gl/iLFtzPRK4iR1Yc9P9"
@@ -27,6 +27,7 @@ export default function Footer() {
               Clifton Center، Shop No 1, Clifton Shopping Arcade، Bank Road, Block 5 Clifton, Karachi, 75600
             </Link>
           </p>
+
           <p className="mt-4 text-gray-900 max-w-2xl mx-auto">
             The best food in Town! Established in 1993. At the time of opening we started
             with the bun kabab's but now we have opened the complete FAST FOOD and BAR-B-Q.
@@ -76,37 +77,63 @@ export default function Footer() {
 
       <div className="px-4 py-4">
         <Swiper
-          modules={[Autoplay]}
           spaceBetween={0}
           slidesPerView={2}
-          loop={true}
-          speed={2000}
-          autoplay={{
-            delay: 0,
-            disableOnInteraction: false,
-          }}
           breakpoints={{
-            768: { slidesPerView: 4 },
+            768: { 
+              slidesPerView: 4,
+            },
           }}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: false,
+          }}
+          loop={true}
+          loopAdditionalSlides={4}
+          modules={[Autoplay]}
+          speed={1000}
+          allowTouchMove={true}
         >
           <SwiperSlide>
-            <div className="relative w-full h-56">
-              <Image src="/1.webp" alt="Image 1" layout="fill" objectFit="cover" />
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/1.webp" alt="Image 1" className="w-full h-full object-cover object-center" />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-56">
-              <Image src="/2.webp" alt="Image 2" layout="fill" objectFit="cover" />
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/2.webp" alt="Image 2" className="w-full h-full object-cover object-center" />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-56">
-              <Image src="/3.webp" alt="Image 3" layout="fill" objectFit="cover" />
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/3.webp" alt="Image 3" className="w-full h-full object-cover object-center" />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="relative w-full h-56">
-              <Image src="/4.webp" alt="Image 4" layout="fill" objectFit="cover" />
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/4.webp" alt="Image 4" className="w-full h-full object-cover object-center" />
+            </div>
+          </SwiperSlide>
+          {/* Duplicate slides to ensure continuous movement */}
+          <SwiperSlide>
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/1.webp" alt="Image 1" className="w-full h-full object-cover object-center" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/2.webp" alt="Image 2" className="w-full h-full object-cover object-center" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/3.webp" alt="Image 3" className="w-full h-full object-cover object-center" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="relative w-full h-48 md:h-56">
+              <img src="/4.webp" alt="Image 4" className="w-full h-full object-cover object-center" />
             </div>
           </SwiperSlide>
         </Swiper>
@@ -114,6 +141,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center py-12 sm:px-6 lg:px-8 text-center space-y-8 sm:space-y-0">
         <h3 className="text-3xl pl-8 font-bold">Download Our App!</h3>
+
         <div className="flex justify-center space-x-4">
           <Link
             href="https://restaurant-website-pi-rouge.vercel.app/"
