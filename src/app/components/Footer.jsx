@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper/modules'
+import { Autoplay } from 'swiper'
 import 'swiper/css'
 
 export default function Footer() {
@@ -17,7 +17,6 @@ export default function Footer() {
 
         <div className="text-center mt-[-50px]">
           <h2 className="text-2xl font-bold">Tipu Burger &amp; Broast</h2>
-
           <p className="mt-2">
             <Link
               href="https://maps.app.goo.gl/iLFtzPRK4iR1Yc9P9"
@@ -28,7 +27,6 @@ export default function Footer() {
               Clifton Center، Shop No 1, Clifton Shopping Arcade، Bank Road, Block 5 Clifton, Karachi, 75600
             </Link>
           </p>
-
           <p className="mt-4 text-gray-900 max-w-2xl mx-auto">
             The best food in Town! Established in 1993. At the time of opening we started
             with the bun kabab's but now we have opened the complete FAST FOOD and BAR-B-Q.
@@ -78,11 +76,13 @@ export default function Footer() {
 
       <div className="px-4 py-4">
         <Swiper
+          modules={[Autoplay]}
           spaceBetween={0}
           slidesPerView={2}
-          modules={[Autoplay]}
+          loop={true}
+          speed={2000}
           autoplay={{
-            delay: 3000,
+            delay: 0,
             disableOnInteraction: false,
           }}
           breakpoints={{
@@ -114,7 +114,6 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center py-12 sm:px-6 lg:px-8 text-center space-y-8 sm:space-y-0">
         <h3 className="text-3xl pl-8 font-bold">Download Our App!</h3>
-
         <div className="flex justify-center space-x-4">
           <Link
             href="https://restaurant-website-pi-rouge.vercel.app/"
