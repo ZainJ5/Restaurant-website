@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
 
 function BannerSwiper() {
@@ -91,14 +90,14 @@ export default function Hero() {
             isAnimating ? 'translate-x-0' : ''
           }`}
         >
-          <Image src={images[current]} alt="Hero" fill priority />
+          <img src={images[current]} alt="Hero" className="w-full h-full object-cover" style={{position: 'absolute'}} />
         </div>
 
         {isAnimating && (
           <div
             className="absolute w-full h-full transform -translate-x-full transition-transform duration-1000 ease-in-out"
           >
-            <Image src={images[previous]} alt="Previous" fill className="object-cover" />
+            <img src={images[previous]} alt="Previous" className="w-full h-full object-cover" style={{position: 'absolute'}} />
           </div>
         )}
 
