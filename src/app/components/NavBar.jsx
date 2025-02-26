@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useBranchStore } from "@/store/branchStore";
@@ -30,11 +29,11 @@ export default function Navbar() {
   };
 
   const socialItems = [
-    { src: "/download.webp", bg: "bg-red-700", href: "/tipu-menu-update-feb-25.pdf" },
-    { src: "/whatsapp-logo.webp", bg: "bg-[rgb(42,168,26)]", href: "https://wa.me/923332245706" },
-    { src: "/phone.webp", bg: "bg-blue-500", href: "tel:+92111822111" },
-    { src: "/facebook.webp", bg: "bg-[rgb(12,144,242)]", href: "https://www.facebook.com/tipuburgerbroast" },
-    { src: "/instagram.png", bg: "bg-black", href: "https://www.tiktok.com/tipuburger" },
+    { src: "/download.webp", href: "/tipu-menu-update-feb-25.pdf" },
+    { src: "/whatsapp-logo.webp", href: "https://wa.me/923332245706" },
+    { src: "/phone.webp", href: "tel:+92111822111" },
+    { src: "/facebook.webp", href: "https://www.facebook.com/tipuburgerbroast" },
+    { src: "/instagram.png", href: "https://www.tiktok.com/tipuburger", rounded: "rounded" },
   ];
 
   return (
@@ -42,7 +41,11 @@ export default function Navbar() {
       <div className="flex justify-center sm:justify-start">
         <Link href="/">
           <div className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 overflow-hidden -mt-8 sm:-mt-10 md:-mt-14 rounded-full">
-            <Image src="/logo.png" alt="Logo" fill className="object-cover" />
+            <img
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-full h-full object-cover" 
+            />
           </div>
         </Link>
       </div>
@@ -106,14 +109,12 @@ export default function Navbar() {
                     key={index}
                     href={item.href}
                     download
-                    className={`${item.bg} rounded-[9px] relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
+                    className={`${item.bg} rounded-[9px] relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center`}
                   >
-                    <Image
+                    <img
                       src={item.src}
                       alt="Download PDF"
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 640px) 32px, 40px"
+                      className="w-full h-full object-contain rounded-[7px]"
                     />
                   </a>
                 );
@@ -124,14 +125,12 @@ export default function Navbar() {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${item.bg} rounded relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
+                  className={`${item.bg} rounded relative hover:opacity-90 transition-opacity w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center`}
                 >
-                  <Image
+                  <img
                     src={item.src}
-                    alt="Social"
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 32px, 40px"
+                    alt="Social icon"
+                    className="w-full h-full rounded-[7px] object-contain"
                   />
                 </Link>
               );
