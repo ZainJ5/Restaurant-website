@@ -82,7 +82,7 @@ export default function Footer() {
           loop={true}
           speed={2000}
           autoplay={{
-            delay: 0,
+            delay: 2500, // 2.5 seconds pause between transitions
             disableOnInteraction: false,
           }}
           breakpoints={{
