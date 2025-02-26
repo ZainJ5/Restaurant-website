@@ -85,6 +85,9 @@ export default function Footer() {
             delay: 0,
             disableOnInteraction: false,
           }}
+          // Enable swiping on all devices, including large screens.
+          allowTouchMove={true}
+          grabCursor={true}
           breakpoints={{
             768: { slidesPerView: 4 },
           }}
