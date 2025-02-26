@@ -34,8 +34,9 @@ const socialItems = [
   { src: "/whatsapp-logo.webp", href: "https://wa.me/923332245706" },
   { src: "/phone.webp", href: "tel:+92111822111" },
   { src: "/facebook.webp", href: "https://www.facebook.com/tipuburgerbroast" },
-  { src: "/instagram.png", href: "https://www.tiktok.com/tipuburger" },
+  { src: "/instagram.png", href: "https://www.tiktok.com/tipuburger", rounded: "rounded" },
 ];
+
 
 
   return (
