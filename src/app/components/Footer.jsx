@@ -84,6 +84,7 @@ export default function Footer() {
           autoplay={{
             delay: 0,
             disableOnInteraction: false,
+            reverseDirection: true
           }}
           breakpoints={{
             768: { slidesPerView: 4 },
