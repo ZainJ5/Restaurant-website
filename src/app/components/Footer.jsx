@@ -1,11 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import SwiperCore, { Autoplay } from 'swiper'
+import { Autoplay } from 'swiper'
 import 'swiper/css'
-
-// Register Autoplay with Swiper
-SwiperCore.use([Autoplay])
 
 export default function Footer() {
   return (
@@ -79,6 +76,7 @@ export default function Footer() {
 
       <div className="px-4 py-4">
         <Swiper
+          modules={[Autoplay]}
           spaceBetween={0}
           slidesPerView={2}
           loop={true}
@@ -87,9 +85,6 @@ export default function Footer() {
             delay: 0,
             disableOnInteraction: false,
           }}
-          // Enable swiping on all devices, including large screens
-          allowTouchMove={true}
-          grabCursor={true}
           breakpoints={{
             768: { slidesPerView: 4 },
           }}
