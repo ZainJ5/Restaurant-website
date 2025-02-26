@@ -132,24 +132,19 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             title="Google Play"
-            className="relative inline-block w-[240px] h-[80px] rounded-full overflow-hidden bg-[#2A2A2A] no-underline"
+            className="relative inline-block m-[5px] pt-[15px] pr-[16px] pb-[5px] pl-[40px] text-lg leading-[1.33] rounded-md whitespace-nowrap cursor-pointer select-none border border-black font-semibold bg-[#111] text-white no-underline hover:bg-[#2c2b2b] focus:bg-[#555] active:bg-[#555] focus:outline-none"
           >
-            <div className="flex items-center h-full px-6">
-              <div className="mr-3">
-                <div className="w-[30px] h-[30px]">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4.5 1.5L15.75 12.75L4.5 24" fill="#00F076"/>
-                    <path d="M4.5 24L15.75 12.75L4.5 1.5L19.5 12.75" fill="#00D3F8"/>
-                    <path d="M4.5 1.5L19.5 12.75L4.5 24L15.75 12.75" fill="#FFF000"/>
-                    <path d="M4.5 1.5L19.5 12.75L15.75 12.75" fill="#FF3D00"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] text-gray-400 font-normal">GET IT ON</div>
-                <div className="text-[20px] text-gray-300 font-normal leading-tight">Google Play</div>
-              </div>
-            </div>
+            <span
+              className="absolute left-[6px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-cover bg-no-repeat"
+              style={{
+                backgroundImage:
+                  "url('https://4.bp.blogspot.com/-52U3eP2JDM4/WSkIT1vbUxI/AAAAAAAArQA/iF1BeARv2To-2FGQU7V6UbNPivuv_lccACLcB/s30/nexus2cee_ic_launcher_play_store_new-1.png')",
+              }}
+            ></span>
+            <span className="absolute top-[5px] left-[40px] text-[10px] font-normal">
+              GET IT ON
+            </span>
+            Google Play
           </Link>
         </div>
       </div>
