@@ -114,7 +114,7 @@ export default function Navbar() {
                     <img
                       src={item.src}
                       alt="Download PDF"
-                      className="w-full h-full object-contain rounded"
+                      className="w-full h-full object-contain rounded-[7px]"
                     />
                   </a>
                 );
@@ -130,7 +130,11 @@ export default function Navbar() {
                   <img
                     src={item.src}
                     alt="Social icon"
+<<<<<<< HEAD
+                    className="w-full h-full rounded-[7px] object-contain"
+=======
                     className="w-full h-full object-contain"
+>>>>>>> ca28fbe0aa65dabe79f1b5f3758d96fcaa5100d6
                   />
                 </Link>
               );
