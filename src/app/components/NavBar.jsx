@@ -29,13 +29,14 @@ export default function Navbar() {
     setIsModalOpen(false);
   };
 
-  const socialItems = [
-    { src: "/download.webp", bg: "bg-red-700", href: "/tipu-menu-update-feb-25.pdf" },
-    { src: "/whatsapp-logo.webp", bg: "bg-[rgb(42,168,26)]", href: "https://wa.me/923332245706" },
-    { src: "/phone.webp", bg: "bg-blue-500", href: "tel:+92111822111" },
-    { src: "/facebook.webp", bg: "bg-[rgb(12,144,242)]", href: "https://www.facebook.com/tipuburgerbroast" },
-    { src: "/instagram.png", bg: "bg-black", href: "https://www.tiktok.com/tipuburger" },
-  ];
+const socialItems = [
+  { src: "/download.webp", href: "/tipu-menu-update-feb-25.pdf" },
+  { src: "/whatsapp-logo.webp", href: "https://wa.me/923332245706" },
+  { src: "/phone.webp", href: "tel:+92111822111" },
+  { src: "/facebook.webp", href: "https://www.facebook.com/tipuburgerbroast" },
+  { src: "/instagram.png", href: "https://www.tiktok.com/tipuburger" },
+];
+
 
   return (
     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
