@@ -1,6 +1,6 @@
 'use client'
 import { useEffect } from 'react'
-import { X, Plus, Minus, ChevronRight } from 'lucide-react'
+import { X, Plus, Minus, ChevronRight, Trash } from 'lucide-react'
 import { toast } from 'react-toastify'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -8,7 +8,7 @@ import { useCartStore } from '../../store/cart'
 
 export default function CartDrawer({ isOpen, onClose }) {
   const router = useRouter();
-  const { items, total, itemCount, updateItemQuantity } = useCartStore();
+  const { items, total, itemCount, updateItemQuantity, removeFromCart } = useCartStore();
 
   const handleCheckout = () => {
     if (total < 500) {
@@ -43,6 +43,11 @@ export default function CartDrawer({ isOpen, onClose }) {
     const newQuantity = (item.quantity || 1) + 1;
     updateItemQuantity(index, newQuantity);
     toast.success(`Added one ${item.title}`);
+  }
+
+  const handleRemove = (index, item) => {
+    removeFromCart(index);
+    toast.info(`Removed ${item.title} from cart`);
   }
 
   return (
@@ -124,6 +129,8 @@ export default function CartDrawer({ isOpen, onClose }) {
                           </button>
                         </div>
                       </div>
+
+                      {/* Render addon list if available */}
                       {item.addons?.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {item.addons.map((addon, i) => (
@@ -136,6 +143,17 @@ export default function CartDrawer({ isOpen, onClose }) {
                           ))}
                         </div>
                       )}
+
+                      {/* Remove item button */}
+                      <div className="mt-2 flex justify-end">
+                        <button 
+                          onClick={() => handleRemove(index, item)}
+                          aria-label={`Remove ${item.title} from cart`}
+                          className="flex items-center text-sm text-red-600 hover:text-red-800 transition-colors"
+                        >
+                          <Trash className="w-5 h-5 mr-1" /> Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

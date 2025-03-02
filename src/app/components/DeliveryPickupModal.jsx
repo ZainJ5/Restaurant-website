@@ -5,10 +5,22 @@ import { useBranchStore } from "../../store/branchStore";
 import { Truck, ShoppingBag } from "lucide-react";
 
 export default function DeliveryPickupModal() {
+  const currentHour = new Date().getHours();
+  if (currentHour >= 4 && currentHour < 16) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
+          <div className="bg-red-600 text-white text-center py-4 px-6">
+            <h2 className="text-2xl font-bold">Service timing 4pm-4am</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const { orderType, setOrderType } = useOrderTypeStore();
   const { branch, setBranch } = useBranchStore();
   
-  // Use default branch value instead of fetching from API
   const [branches, setBranches] = useState([
     {
       _id: "67b904f9397c3ee1c79e08d1",
@@ -19,7 +31,6 @@ export default function DeliveryPickupModal() {
     },
   ]);
   
-  // Set the default branch on mount if none is selected
   useEffect(() => {
     if (!branch && branches.length > 0) {
       setBranch(branches[0]);
