@@ -20,8 +20,9 @@ export default function Banner() {
   const setActiveCategoryName = useMenuStore((state) => state.setActiveCategoryName);
 
   const [activeSubcategoryName, setActiveSubcategoryName] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   
   const [bannerState, setBannerState] = useState({
     src: `/${DEFAULT_BANNER}.webp`,
@@ -34,6 +35,18 @@ export default function Banner() {
   
   const [currentBannerName, setCurrentBannerName] = useState(DEFAULT_BANNER);
   
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Standard breakpoint for mobile
+    };
+    
+    checkIsMobile(); // Check on initial load
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  
   const getId = useCallback((idField) => {
     if (!idField) return null;
     if (typeof idField === 'object' && idField !== null) {
@@ -42,6 +55,7 @@ export default function Banner() {
     return idField;
   }, []);
 
+  // Preload default banner on component mount
   useEffect(() => {
     const img = new Image();
     img.src = `/${DEFAULT_BANNER}.webp`;
@@ -94,7 +108,9 @@ export default function Banner() {
         setActiveSubcategoryName(null);
         setIsLoading(false);
         
-        changeBanner(DEFAULT_BANNER, `${DEFAULT_BANNER} banner`);
+        if (!isMobile) {
+          changeBanner(DEFAULT_BANNER, `${DEFAULT_BANNER} banner`);
+        }
         return;
       }
 
@@ -128,10 +144,11 @@ export default function Banner() {
     }
 
     updateNames();
-  }, [activeCategory, activeSubcategory, setActiveCategoryName, fetchData, getId, isInitialLoad]);
+  }, [activeCategory, activeSubcategory, setActiveCategoryName, fetchData, getId, isInitialLoad, isMobile]);
 
+  // Helper function to change banner with proper transitions - only used on desktop
   const changeBanner = useCallback((name, altText) => {
-    if (name === currentBannerName) {
+    if (name === currentBannerName || isMobile) {
       return;
     }
     
@@ -175,10 +192,10 @@ export default function Banner() {
         }));
       };
     }, 300);
-  }, [currentBannerName]);
+  }, [currentBannerName, isMobile]);
 
   useEffect(() => {
-    if (isInitialLoad) return;
+    if (isInitialLoad || isMobile) return;
     
     const bannerToShow = activeSubcategoryName || activeCategoryName || DEFAULT_BANNER;
     const altText = activeSubcategoryName
@@ -188,8 +205,39 @@ export default function Banner() {
         : `${DEFAULT_BANNER} banner`;
     
     changeBanner(bannerToShow, altText);
-  }, [activeSubcategoryName, activeCategoryName, changeBanner, isInitialLoad]);
+  }, [activeSubcategoryName, activeCategoryName, changeBanner, isInitialLoad, isMobile]);
 
+  // For mobile, maintain the original UI
+  if (isMobile) {
+    const bannerToShow = activeSubcategoryName || activeCategoryName;
+    const bannerAltText = activeSubcategoryName
+      ? `${activeSubcategoryName} subcategory banner`
+      : `${activeCategoryName} category banner`;
+      
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
+        {bannerToShow ? (
+          <div className="relative w-full">
+            <img
+              src={`/${bannerToShow}.webp`}
+              alt={bannerAltText}
+              className="w-full h-auto rounded-md object-contain"
+              onLoad={() => console.log(`Successfully loaded banner image: ${bannerToShow}.webp`)}
+              onError={() => console.error(`Error loading banner image: ${bannerToShow}.webp`)}
+            />
+          </div>
+        ) : (
+          <div className="h-32 sm:h-20 flex items-center justify-center bg-gray-200 rounded-md shadow-md">
+            <h1 className="text-black text-xl sm:text-2xl font-bold">
+              {isLoading ? "Loading..." : DEFAULT_BANNER}
+            </h1>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // For desktop, use the optimized version
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
       <div className="relative w-full h-auto min-h-[180px] bg-gray-200 rounded-md overflow-hidden">
