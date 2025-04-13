@@ -14,8 +14,10 @@ export default function FoodItemList() {
     category: "",
     subcategory: "",
     branch: "",
+    variations: [],
   });
   const [editImage, setEditImage] = useState(null);
+  const [originalItemData, setOriginalItemData] = useState(null);
 
   useEffect(() => {
     fetchFoodItems();
@@ -68,25 +70,38 @@ export default function FoodItemList() {
   };
 
   const handleEditClick = (item) => {
+    // Store the original item for reference when submitting
+    setOriginalItemData(item);
+    
+    const categoryId = typeof item.category === "object" && item.category !== null
+      ? extractValue(item.category._id)
+      : extractValue(item.category);
+      
+    const subcategoryId = typeof item.subcategory === "object" && item.subcategory !== null
+      ? extractValue(item.subcategory._id)
+      : extractValue(item.subcategory);
+      
+    const branchId = typeof item.branch === "object" && item.branch !== null
+      ? extractValue(item.branch._id)
+      : extractValue(item.branch);
+    
     setEditingItemId(extractValue(item._id));
     setEditData({
       title: item.title || "",
       description: item.description || "",
       price: item.price || "",
-      category:
-        typeof item.category === "object" && item.category._id
-          ? item.category._id
-          : item.category || "",
-      subcategory:
-        typeof item.subcategory === "object" && item.subcategory._id
-          ? item.subcategory._id
-          : item.subcategory || "",
-      branch:
-        typeof item.branch === "object" && item.branch._id
-          ? item.branch._id
-          : item.branch || "",
+      category: categoryId || "",
+      subcategory: subcategoryId || "",
+      branch: branchId || "",
+      variations: item.variations || [],
     });
     setEditImage(null);
+    
+    console.log("Edit data initialized:", {
+      categoryId,
+      subcategoryId,
+      branchId
+    });
   };
 
   const handleEditChange = (e) => {
@@ -103,6 +118,38 @@ export default function FoodItemList() {
     }
   };
 
+  const handleVariationChange = (index, field, value) => {
+    setEditData((prev) => {
+      const updatedVariations = [...prev.variations];
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        [field]: field === 'price' ? Number(value) : value
+      };
+      return {
+        ...prev,
+        variations: updatedVariations
+      };
+    });
+  };
+
+  const addVariation = () => {
+    setEditData((prev) => ({
+      ...prev,
+      variations: [...prev.variations, { name: "", price: 0 }]
+    }));
+  };
+
+  const removeVariation = (index) => {
+    setEditData((prev) => {
+      const updatedVariations = [...prev.variations];
+      updatedVariations.splice(index, 1);
+      return {
+        ...prev,
+        variations: updatedVariations
+      };
+    });
+  };
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editingItemId) return;
@@ -110,10 +157,53 @@ export default function FoodItemList() {
     const formData = new FormData();
     formData.append("title", editData.title);
     formData.append("description", editData.description);
-    formData.append("price", editData.price);
-    formData.append("category", editData.category);
-    formData.append("subcategory", editData.subcategory);
-    formData.append("branch", editData.branch);
+    
+    // Only include price if no variations
+    if (!editData.variations || editData.variations.length === 0) {
+      formData.append("price", editData.price);
+    }
+    
+    // Make sure to include category, subcategory and branch IDs
+    // Use the values from original item if they exist
+    const categoryId = editData.category || 
+      (originalItemData && typeof originalItemData.category === "object" && originalItemData.category?._id 
+        ? extractValue(originalItemData.category._id) 
+        : extractValue(originalItemData?.category));
+    
+    const subcategoryId = editData.subcategory || 
+      (originalItemData && typeof originalItemData.subcategory === "object" && originalItemData.subcategory?._id 
+        ? extractValue(originalItemData.subcategory._id) 
+        : extractValue(originalItemData?.subcategory));
+    
+    const branchId = editData.branch || 
+      (originalItemData && typeof originalItemData.branch === "object" && originalItemData.branch?._id 
+        ? extractValue(originalItemData.branch._id) 
+        : extractValue(originalItemData?.branch));
+    
+    // Append these values to the form
+    formData.append("category", categoryId);
+    if (subcategoryId) {
+      formData.append("subcategory", subcategoryId);
+    }
+    formData.append("branch", branchId);
+    
+    console.log("Submitting with category, subcategory, branch:", {
+      categoryId,
+      subcategoryId,
+      branchId
+    });
+    
+    // Add variations to formData
+    if (editData.variations && editData.variations.length > 0) {
+      // Filter out empty variations
+      const validVariations = editData.variations.filter(
+        v => v.name && v.name.trim() !== "" && v.price !== null && v.price !== undefined
+      );
+      
+      if (validVariations.length > 0) {
+        formData.append("variations", JSON.stringify(validVariations));
+      }
+    }
 
     if (editImage) {
       formData.append("foodImage", editImage);
@@ -124,6 +214,7 @@ export default function FoodItemList() {
         method: "PATCH",
         body: formData,
       });
+      
       if (res.ok) {
         toast.success("Item updated successfully");
         setEditingItemId(null);
@@ -134,11 +225,14 @@ export default function FoodItemList() {
           category: "",
           subcategory: "",
           branch: "",
+          variations: [],
         });
+        setOriginalItemData(null);
         setEditImage(null);
         fetchFoodItems();
       } else {
-        toast.error("Failed to update item");
+        const errorData = await res.json();
+        toast.error(`Failed to update item: ${errorData.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error updating item:", error);
@@ -155,7 +249,9 @@ export default function FoodItemList() {
       category: "",
       subcategory: "",
       branch: "",
+      variations: [],
     });
+    setOriginalItemData(null);
     setEditImage(null);
   };
 
@@ -187,14 +283,19 @@ export default function FoodItemList() {
                   placeholder="Description"
                   className="border p-2 w-full"
                 ></textarea>
-                <input
-                  type="number"
-                  name="price"
-                  value={editData.price}
-                  onChange={handleEditChange}
-                  placeholder="Price"
-                  className="border p-2 w-full"
-                />
+                
+                {/* Show price field only when no variations */}
+                {(!editData.variations || editData.variations.length === 0) && (
+                  <input
+                    type="number"
+                    name="price"
+                    value={editData.price}
+                    onChange={handleEditChange}
+                    placeholder="Price"
+                    className="border p-2 w-full"
+                  />
+                )}
+                
                 <div>
                   <label className="block text-sm font-semibold">
                     Category ID (not editable)
@@ -231,6 +332,53 @@ export default function FoodItemList() {
                     className="border p-2 w-full bg-gray-100"
                   />
                 </div>
+                
+                {/* Variations Section */}
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-bold">Variations</h3>
+                    <button
+                      type="button"
+                      onClick={addVariation}
+                      className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition"
+                    >
+                      Add Variation
+                    </button>
+                  </div>
+                  
+                  {editData.variations && editData.variations.length > 0 ? (
+                    <div className="space-y-2">
+                      {editData.variations.map((variation, index) => (
+                        <div key={index} className="flex flex-wrap gap-2 items-center p-2 border rounded">
+                          <input
+                            type="text"
+                            value={variation.name || ""}
+                            onChange={(e) => handleVariationChange(index, 'name', e.target.value)}
+                            placeholder="Variation Name"
+                            className="flex-1 border p-2 min-w-[150px]"
+                          />
+                          <input
+                            type="number"
+                            value={variation.price || 0}
+                            onChange={(e) => handleVariationChange(index, 'price', e.target.value)}
+                            placeholder="Price"
+                            className="w-24 border p-2"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeVariation(index)}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No variations added</p>
+                  )}
+                </div>
+                
                 <div>
                   <label className="block text-sm font-semibold">
                     Update Image (optional)
@@ -277,7 +425,9 @@ export default function FoodItemList() {
             <div className="flex-1 w-full">
               <h3 className="text-xl font-bold">{item.title}</h3>
               <p>{item.description}</p>
-              <p className="font-semibold">{price} Rs</p>
+              {(!item.variations || item.variations.length === 0) && (
+                <p className="font-semibold">{price} Rs</p>
+              )}
               {item.branch &&
               typeof item.branch === "object" &&
               item.branch.name ? (
