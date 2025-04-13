@@ -6,7 +6,7 @@ import { useOrderTypeStore } from "../../store/orderTypeStore";
 import { useCartStore } from "../../store/cart";
 import { useBranchStore } from "../../store/branchStore";
 import DeliveryPickupModal from "../components/DeliveryPickupModal";
-import { areasOfLahore } from "../lib/areasOfLahore";
+import { areasOfLahore } from "../lib/deliveryAreas";
 import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
