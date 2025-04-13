@@ -1,5 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useMenuStore } from '../../store/menu';
+
+const cache = {
+  categories: null,
+  subcategories: null,
+  lastFetch: {
+    categories: 0,
+    subcategories: 0
+  }
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; 
 
 export default function Banner() {
   const activeCategory = useMenuStore((state) => state.activeCategory);
@@ -8,92 +19,184 @@ export default function Banner() {
   const setActiveCategoryName = useMenuStore((state) => state.setActiveCategoryName);
 
   const [activeSubcategoryName, setActiveSubcategoryName] = useState(null);
-
-  useEffect(() => {
-  }, [activeCategory, activeSubcategory, activeCategoryName]);
-
-  const getId = (idField) => {
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const [bannerState, setBannerState] = useState({
+    src: null,
+    alt: null,
+    isVisible: false,
+    isLoaded: false,
+    isError: false,
+    key: 0 
+  });
+  
+  const [currentBannerName, setCurrentBannerName] = useState(null);
+  
+  const getId = useCallback((idField) => {
+    if (!idField) return null;
     if (typeof idField === 'object' && idField !== null) {
-      if (idField.$oid) return idField.$oid;
-      if (idField._id) return getId(idField._id);
+      return idField.$oid || (idField._id ? getId(idField._id) : idField);
     }
     return idField;
-  };
+  }, []);
+
+  const fetchData = useCallback(async (endpoint, cacheKey) => {
+    const now = Date.now();
+    if (cache[cacheKey] && (now - cache.lastFetch[cacheKey]) < CACHE_DURATION) {
+      return cache[cacheKey]; 
+    }
+    
+    try {
+      const res = await fetch(`/api/${endpoint}`);
+      const data = await res.json();
+      cache[cacheKey] = data;
+      cache.lastFetch[cacheKey] = now;
+      return data;
+    } catch (error) {
+      console.error(`Error fetching ${endpoint}:`, error);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-    async function fetchNames() {
+    async function updateNames() {
+      setIsLoading(true);
+      
       if (!activeCategory) {
         setActiveCategoryName(null);
         setActiveSubcategoryName(null);
+        setIsLoading(false);
         return;
       }
+
       try {
-        const catRes = await fetch('/api/categories');
-        const categoriesData = await catRes.json();
-        const activeCatId = typeof activeCategory === 'object' ? getId(activeCategory._id) : activeCategory;
-        const matchedCategory = categoriesData.find(cat => getId(cat._id) === activeCatId);
+        const [categoriesData, subcategoriesData] = await Promise.all([
+          fetchData('categories', 'categories'),
+          fetchData('subcategories', 'subcategories')
+        ]);
+
+        const activeCatId = getId(activeCategory);
+        const matchedCategory = categoriesData?.find(cat => getId(cat._id) === activeCatId);
         const catName = matchedCategory ? matchedCategory.name : null;
         setActiveCategoryName(catName);
 
-        if (activeSubcategory) {
-          const subRes = await fetch('/api/subcategories');
-          const subcategoriesData = await subRes.json();
-          const activeSubcatId = typeof activeSubcategory === 'object' ? getId(activeSubcategory._id) : activeSubcategory;
-          const matchedSubcategory = subcategoriesData.find(sub => getId(sub._id) === activeSubcatId);
-          if (matchedSubcategory) {
-            setActiveSubcategoryName(matchedSubcategory.name);
-            console.log("Fetched Subcategory Name:", matchedSubcategory.name);
-          } else {
-            setActiveSubcategoryName(null);
-          }
+        if (activeSubcategory && subcategoriesData) {
+          const activeSubcatId = getId(activeSubcategory);
+          const matchedSubcategory = subcategoriesData.find(
+            sub => getId(sub._id) === activeSubcatId
+          );
+          setActiveSubcategoryName(matchedSubcategory?.name || null);
         } else {
           setActiveSubcategoryName(null);
         }
       } catch (error) {
-        console.error("Error fetching category or subcategory data:", error);
+        console.error("Error processing data:", error);
         setActiveCategoryName(null);
         setActiveSubcategoryName(null);
+      } finally {
+        setIsLoading(false);
       }
     }
-    fetchNames();
-  }, [activeCategory, activeSubcategory, setActiveCategoryName]);
 
-  const bannerToShow = activeSubcategoryName || activeCategoryName;
-  const bannerAltText = activeSubcategoryName
-    ? `${activeSubcategoryName} subcategory banner`
-    : `${activeCategoryName} category banner`;
+    updateNames();
+  }, [activeCategory, activeSubcategory, setActiveCategoryName, fetchData, getId]);
 
   useEffect(() => {
-    if (bannerToShow) {
-      console.log(`Attempting to load banner image: ${bannerToShow}.webp with alt text: "${bannerAltText}"`);
+    const bannerToShow = activeSubcategoryName || activeCategoryName;
+    
+    if (bannerToShow === currentBannerName) {
+      return;
     }
-  }, [bannerToShow, bannerAltText]);
-
-  const handleImageLoad = () => {
-    console.log(`Successfully loaded banner image: ${bannerToShow}.webp`);
-  };
-
-  const handleImageError = () => {
-    console.error(`Error loading banner image: ${bannerToShow}.webp`);
-  };
+    
+    setCurrentBannerName(bannerToShow);
+    
+    setBannerState(prev => ({
+      ...prev,
+      isVisible: false
+    }));
+    
+    if (bannerToShow) {
+      setTimeout(() => {
+        const newBanner = {
+          src: `/${bannerToShow}.webp`,
+          alt: activeSubcategoryName
+            ? `${activeSubcategoryName} subcategory banner`
+            : `${activeCategoryName} category banner`,
+          isVisible: false,
+          isLoaded: false,
+          isError: false,
+          key: Date.now() 
+        };
+        
+        setBannerState(newBanner);
+        
+        const img = new Image();
+        img.src = newBanner.src;
+        
+        img.onload = () => {
+          setBannerState(prev => ({
+            ...prev,
+            isLoaded: true,
+            isVisible: true,
+            isError: false
+          }));
+        };
+        
+        img.onerror = () => {
+          setBannerState(prev => ({
+            ...prev,
+            isLoaded: false,
+            isVisible: false,
+            isError: true
+          }));
+        };
+      }, 300);
+    } else {
+      setBannerState({
+        src: null,
+        alt: null,
+        isVisible: false,
+        isLoaded: false,
+        isError: false,
+        key: Date.now()
+      });
+    }
+  }, [activeSubcategoryName, activeCategoryName]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
-      {bannerToShow ? (
-        <div className="relative w-full">
+      <div className="relative w-full h-auto min-h-[180px] bg-gray-200 rounded-md overflow-hidden">
+        {isLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-black text-xl sm:text-2xl font-bold">Loading...</div>
+          </div>
+        ) : bannerState.src && !bannerState.isError ? (
           <img
-            src={`/${bannerToShow}.webp`}
-            alt={bannerAltText}
-            className="w-full h-auto rounded-md object-contain"
-            onLoad={handleImageLoad}
-            onError={handleImageError}
+            key={bannerState.key}
+            src={bannerState.src}
+            alt={bannerState.alt}
+            className="w-full h-auto object-contain rounded-md"
+            style={{
+              opacity: bannerState.isVisible ? 1 : 0,
+              transition: 'opacity 400ms ease-in-out'
+            }}
+            onLoad={() => {
+              setBannerState(prev => ({ ...prev, isLoaded: true, isVisible: true }));
+            }}
+            onError={() => {
+              setBannerState(prev => ({ ...prev, isError: true }));
+            }}
           />
-        </div>
-      ) : (
-        <div className="h-32 sm:h-20 flex items-center justify-center bg-gray-200 rounded-md shadow-md">
-          <h1 className="text-black text-xl sm:text-2xl font-bold">Loading...</h1>
-        </div>
-      )}
+        ) : bannerState.isError ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-black text-xl sm:text-2xl font-bold">Banner unavailable</div>
+          </div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-black text-xl sm:text-2xl font-bold">No banner selected</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
