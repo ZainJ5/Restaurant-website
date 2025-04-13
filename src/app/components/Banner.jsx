@@ -11,6 +11,7 @@ const cache = {
 };
 
 const CACHE_DURATION = 5 * 60 * 1000; 
+const DEFAULT_BANNER = "Hot deals";
 
 export default function Banner() {
   const activeCategory = useMenuStore((state) => state.activeCategory);
@@ -19,18 +20,19 @@ export default function Banner() {
   const setActiveCategoryName = useMenuStore((state) => state.setActiveCategoryName);
 
   const [activeSubcategoryName, setActiveSubcategoryName] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); 
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   const [bannerState, setBannerState] = useState({
-    src: null,
-    alt: null,
-    isVisible: false,
+    src: `/${DEFAULT_BANNER}.webp`,
+    alt: `${DEFAULT_BANNER} banner`,
+    isVisible: true,
     isLoaded: false,
     isError: false,
     key: 0 
   });
   
-  const [currentBannerName, setCurrentBannerName] = useState(null);
+  const [currentBannerName, setCurrentBannerName] = useState(DEFAULT_BANNER);
   
   const getId = useCallback((idField) => {
     if (!idField) return null;
@@ -38,6 +40,26 @@ export default function Banner() {
       return idField.$oid || (idField._id ? getId(idField._id) : idField);
     }
     return idField;
+  }, []);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = `/${DEFAULT_BANNER}.webp`;
+    
+    img.onload = () => {
+      setBannerState(prev => ({
+        ...prev,
+        isLoaded: true,
+        isVisible: true
+      }));
+    };
+    
+    img.onerror = () => {
+      setBannerState(prev => ({
+        ...prev,
+        isError: true
+      }));
+    };
   }, []);
 
   const fetchData = useCallback(async (endpoint, cacheKey) => {
@@ -59,6 +81,11 @@ export default function Banner() {
   }, []);
 
   useEffect(() => {
+    if (isInitialLoad && !activeCategory) {
+      setIsInitialLoad(false);
+      return;
+    }
+
     async function updateNames() {
       setIsLoading(true);
       
@@ -66,6 +93,8 @@ export default function Banner() {
         setActiveCategoryName(null);
         setActiveSubcategoryName(null);
         setIsLoading(false);
+        
+        changeBanner(DEFAULT_BANNER, `${DEFAULT_BANNER} banner`);
         return;
       }
 
@@ -99,69 +128,67 @@ export default function Banner() {
     }
 
     updateNames();
-  }, [activeCategory, activeSubcategory, setActiveCategoryName, fetchData, getId]);
+  }, [activeCategory, activeSubcategory, setActiveCategoryName, fetchData, getId, isInitialLoad]);
 
-  useEffect(() => {
-    const bannerToShow = activeSubcategoryName || activeCategoryName;
-    
-    if (bannerToShow === currentBannerName) {
+  const changeBanner = useCallback((name, altText) => {
+    if (name === currentBannerName) {
       return;
     }
     
-    setCurrentBannerName(bannerToShow);
+    setCurrentBannerName(name);
     
     setBannerState(prev => ({
       ...prev,
       isVisible: false
     }));
     
-    if (bannerToShow) {
-      setTimeout(() => {
-        const newBanner = {
-          src: `/${bannerToShow}.webp`,
-          alt: activeSubcategoryName
-            ? `${activeSubcategoryName} subcategory banner`
-            : `${activeCategoryName} category banner`,
-          isVisible: false,
-          isLoaded: false,
-          isError: false,
-          key: Date.now() 
-        };
-        
-        setBannerState(newBanner);
-        
-        const img = new Image();
-        img.src = newBanner.src;
-        
-        img.onload = () => {
-          setBannerState(prev => ({
-            ...prev,
-            isLoaded: true,
-            isVisible: true,
-            isError: false
-          }));
-        };
-        
-        img.onerror = () => {
-          setBannerState(prev => ({
-            ...prev,
-            isLoaded: false,
-            isVisible: false,
-            isError: true
-          }));
-        };
-      }, 300);
-    } else {
-      setBannerState({
-        src: null,
-        alt: null,
+    setTimeout(() => {
+      const newBanner = {
+        src: `/${name}.webp`,
+        alt: altText || `${name} banner`,
         isVisible: false,
         isLoaded: false,
         isError: false,
-        key: Date.now()
-      });
-    }
-  }, [activeSubcategoryName, activeCategoryName]);
+        key: Date.now() 
+      };
+      
+      setBannerState(newBanner);
+      
+      const img = new Image();
+      img.src = newBanner.src;
+      
+      img.onload = () => {
+        setBannerState(prev => ({
+          ...prev,
+          isLoaded: true,
+          isVisible: true,
+          isError: false
+        }));
+      };
+      
+      img.onerror = () => {
+        setBannerState(prev => ({
+          ...prev,
+          isLoaded: false,
+          isVisible: false,
+          isError: true
+        }));
+      };
+    }, 300);
+  }, [currentBannerName]);
+
+  useEffect(() => {
+    if (isInitialLoad) return;
+    
+    const bannerToShow = activeSubcategoryName || activeCategoryName || DEFAULT_BANNER;
+    const altText = activeSubcategoryName
+      ? `${activeSubcategoryName} subcategory banner`
+      : activeCategoryName 
+        ? `${activeCategoryName} category banner` 
+        : `${DEFAULT_BANNER} banner`;
+    
+    changeBanner(bannerToShow, altText);
+  }, [activeSubcategoryName, activeCategoryName, changeBanner, isInitialLoad]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
@@ -193,7 +220,7 @@ export default function Banner() {
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-black text-xl sm:text-2xl font-bold">No banner selected</div>
+            <div className="text-black text-xl sm:text-2xl font-bold">Loading banner...</div>
           </div>
         )}
       </div>
