@@ -8,20 +8,20 @@ export default function DeliveryPickupModal() {
   const currentHour = new Date().getHours();
   const currentMinutes = new Date().getMinutes();
 
-  const isBeforeOpening = (currentHour < 11) || (currentHour === 11 && currentMinutes < 30);
-  const isAfterClosing = (currentHour >= 3 && currentHour < 11) || (currentHour === 11 && currentMinutes < 30);
+  // const isBeforeOpening = (currentHour < 11) || (currentHour === 11 && currentMinutes < 30);
+  // const isAfterClosing = (currentHour >= 3 && currentHour < 11) || (currentHour === 11 && currentMinutes < 30);
   
-  if (isBeforeOpening || isAfterClosing) {
-    return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-        <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
-          <div className="bg-red-600 text-white text-center py-4 px-6">
-            <h2 className="text-2xl font-bold">Service timing 11:30am-3am</h2>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (isBeforeOpening || isAfterClosing) {
+  //   return (
+  //     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+  //       <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
+  //         <div className="bg-red-600 text-white text-center py-4 px-6">
+  //           <h2 className="text-2xl font-bold">Service timing 11:30am-3am</h2>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const { orderType, setOrderType } = useOrderTypeStore();
   const { branch, setBranch } = useBranchStore();

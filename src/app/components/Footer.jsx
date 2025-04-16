@@ -98,46 +98,13 @@ export default function Footer() {
           speed={1000}
           allowTouchMove={true}
         >
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/1.webp" alt="Image 1" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/2.webp" alt="Image 2" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/3.webp" alt="Image 3" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/4.webp" alt="Image 4" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/1.webp" alt="Image 1" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/2.webp" alt="Image 2" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/3.webp" alt="Image 3" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-58 object-cover">
-              <img src="/4.webp" alt="Image 4" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            </div>
-          </SwiperSlide>
+          {Array.from({ length: 17 }, (_, i) => i + 1).map((num) => (
+            <SwiperSlide key={num}>
+              <div className="relative w-full h-58 object-cover">
+                <img src={`/${num}.webp`} alt={`Image ${num}`} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+              </div>
+            </SwiperSlide>
+          ))}
         </Swiper>
       </div>
 

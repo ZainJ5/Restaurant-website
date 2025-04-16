@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AddBranchForm from "./AddBranchForm"; 
+import AddBranchForm from "./AddBranchForm";
 import AddCategoryForm from "./CategoryForm";
 import AddSubcategoryForm from "./SubcategoryForm";
 import AddFoodItemForm from "./FoodItemForm";
@@ -179,202 +179,50 @@ export default function AdminPortal() {
   };
 
   return (
-    <div className="min-h-screen text-black bg-gray-100 p-2 sm:p-4 md:p-6">
-      <style jsx global>{`
-        /* Custom scrollbar styles */
-        ::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #c5d1eb;
-          border-radius: 10px;
-          transition: background 0.2s ease;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #9aaed8;
-        }
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #c5d1eb #f1f1f1;
-        }
-        .sidebar {
-          max-height: 100%;
-          overflow-y: auto;
-        }
-        .content-scroll {
-          overflow-y: auto;
-        }
-      `}</style>
-
-      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row h-[92vh] sm:h-[90vh] md:h-[85vh]">
-        {/* Sidebar for medium and larger devices */}
-        <div className="hidden md:block sidebar w-full md:w-1/4 lg:w-1/5 bg-blue-600 text-white p-4 transition-all duration-300 ease-in-out">
-          <h2 className="text-xl font-bold mb-4 px-2 sticky top-0 bg-blue-600 pt-1 z-10">
-            Admin Menu
-          </h2>
+    <div className="min-h-screen text-black bg-gradient-to-br from-gray-100 to-gray-200 p-4">
+      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row h-[92vh]">
+        <div className="hidden md:block w-full md:w-1/4 bg-[#ba0000] text-white p-4 overflow-y-auto">
+          <h2 className="text-xl font-semibold mb-4">Admin Menu</h2>
           <ul className="space-y-2">
-            <li>
-              <button
-                onClick={() => setSelectedTab("branch")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "branch" ? "bg-blue-800" : "hover:bg-blue-700"
-                }`}
-              >
-                Add Branch
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("category")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "category" ? "bg-blue-800" : "hover:bg-blue-700"
-                }`}
-              >
-                Add Category
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("subcategory")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "subcategory"
-                    ? "bg-blue-800"
-                    : "hover:bg-blue-700"
-                }`}
-              >
-                Add Subcategory
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("foodItem")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "foodItem" ? "bg-blue-800" : "hover:bg-blue-700"
-                }`}
-              >
-                Add Food Item
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("orders")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "orders" ? "bg-blue-800" : "hover:bg-blue-700"
-                }`}
-              >
-                Orders
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("items")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "items" ? "bg-blue-800" : "hover:bg-blue-700"
-                }`}
-              >
-                All Items
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("allCategories")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "allCategories"
-                    ? "bg-blue-800"
-                    : "hover:bg-blue-700"
-                }`}
-              >
-                All Categories
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("allSubcategories")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "allSubcategories"
-                    ? "bg-blue-800"
-                    : "hover:bg-blue-700"
-                }`}
-              >
-                All Subcategories
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setSelectedTab("promocodes")}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition duration-150 ${
-                  selectedTab === "promocodes"
-                    ? "bg-blue-800"
-                    : "hover:bg-blue-700"
-                }`}
-              >
-                Promo Codes
-              </button>
-            </li>
+            {["branch", "category", "subcategory", "foodItem", "orders", "items", "allCategories", "allSubcategories", "promocodes"].map((tab) => (
+              <li key={tab}>
+                <button
+                  onClick={() => setSelectedTab(tab)}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition duration-150 ${
+                    selectedTab === tab ? "bg-red-800" : "hover:bg-red-700"
+                  }`}
+                >
+                  {tab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Horizontal navigation for small devices */}
-        <div className="block md:hidden bg-blue-600 text-white p-4">
-          <h2 className="text-xl font-bold mb-2">Admin Menu</h2>
+        <div className="block md:hidden bg-[#ba0000] text-white p-4">
+          <h2 className="text-lg font-semibold mb-2">Admin Menu</h2>
           <div className="flex overflow-x-auto space-x-2">
-            {[
-              { key: "branch", label: "Add Branch" },
-              { key: "category", label: "Add Category" },
-              { key: "subcategory", label: "Add Subcategory" },
-              { key: "foodItem", label: "Add Food Item" },
-              { key: "orders", label: "Orders" },
-              { key: "items", label: "All Items" },
-              { key: "allCategories", label: "All Categories" },
-              { key: "allSubcategories", label: "All Subcategories" },
-              { key: "promocodes", label: "Promo Codes" },
-            ].map((tab) => (
+            {["branch", "category", "subcategory", "foodItem", "orders", "items", "allCategories", "allSubcategories", "promocodes"].map((tab) => (
               <button
-                key={tab.key}
-                onClick={() => setSelectedTab(tab.key)}
-                className={`px-3 py-2 rounded text-sm transition duration-150 whitespace-nowrap ${
-                  selectedTab === tab.key
-                    ? "bg-blue-800"
-                    : "hover:bg-blue-700"
+                key={tab}
+                onClick={() => setSelectedTab(tab)}
+                className={`px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition duration-150 ${
+                  selectedTab === tab ? "bg-red-800" : "hover:bg-red-700"
                 }`}
               >
-                {tab.label}
+                {tab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="w-full md:w-3/4 lg:w-4/5 p-4 sm:p-6 md:p-8 content-scroll">
+        <div className="w-full md:w-3/4 p-4 overflow-y-auto">
           <div className="flex justify-center items-center mb-4">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold capitalize">
-              {selectedTab === "foodItem"
-                ? "Add Food Item"
-                : selectedTab === "subcategory"
-                ? "Add Subcategory"
-                : selectedTab === "orders"
-                ? "Received Orders"
-                : selectedTab === "items"
-                ? "All Items"
-                : selectedTab === "allCategories"
-                ? "All Categories"
-                : selectedTab === "allSubcategories"
-                ? "All Subcategories"
-                : selectedTab === "branch"
-                ? "Add Branch"
-                : selectedTab === "category"
-                ? "Add Category"
-                : selectedTab === "promocodes"
-                ? "Promo Codes"
-                : null}
+            <h1 className="text-3xl font-bold capitalize text-[#ba0000]">
+              {selectedTab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
             </h1>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm">
+          <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
             {renderContent()}
           </div>
         </div>

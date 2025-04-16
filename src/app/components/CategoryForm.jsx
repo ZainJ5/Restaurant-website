@@ -44,7 +44,7 @@ export default function AddCategoryForm({ branches, addCategory }) {
       </div>
       <button
         type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        className="bg-[#ba0000] text-white px-4 py-2 rounded hover:bg-[#cb3939] transition"
       >
         Add Category
       </button>

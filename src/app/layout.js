@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Restaurant Name',
+  title: 'Tipu Burger and Broast',
   description: 'Best Food in Town Since 1993',
 }
 

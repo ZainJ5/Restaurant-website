@@ -70,7 +70,6 @@ export default function FoodItemList() {
   };
 
   const handleEditClick = (item) => {
-    // Store the original item for reference when submitting
     setOriginalItemData(item);
     
     const categoryId = typeof item.category === "object" && item.category !== null
@@ -158,13 +157,10 @@ export default function FoodItemList() {
     formData.append("title", editData.title);
     formData.append("description", editData.description);
     
-    // Only include price if no variations
     if (!editData.variations || editData.variations.length === 0) {
       formData.append("price", editData.price);
     }
-    
-    // Make sure to include category, subcategory and branch IDs
-    // Use the values from original item if they exist
+
     const categoryId = editData.category || 
       (originalItemData && typeof originalItemData.category === "object" && originalItemData.category?._id 
         ? extractValue(originalItemData.category._id) 
@@ -180,7 +176,6 @@ export default function FoodItemList() {
         ? extractValue(originalItemData.branch._id) 
         : extractValue(originalItemData?.branch));
     
-    // Append these values to the form
     formData.append("category", categoryId);
     if (subcategoryId) {
       formData.append("subcategory", subcategoryId);
@@ -193,9 +188,7 @@ export default function FoodItemList() {
       branchId
     });
     
-    // Add variations to formData
     if (editData.variations && editData.variations.length > 0) {
-      // Filter out empty variations
       const validVariations = editData.variations.filter(
         v => v.name && v.name.trim() !== "" && v.price !== null && v.price !== undefined
       );
@@ -284,7 +277,6 @@ export default function FoodItemList() {
                   className="border p-2 w-full"
                 ></textarea>
                 
-                {/* Show price field only when no variations */}
                 {(!editData.variations || editData.variations.length === 0) && (
                   <input
                     type="number"
@@ -333,7 +325,6 @@ export default function FoodItemList() {
                   />
                 </div>
                 
-                {/* Variations Section */}
                 <div className="mt-4">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-bold">Variations</h3>
