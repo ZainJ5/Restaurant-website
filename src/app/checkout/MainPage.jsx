@@ -184,8 +184,9 @@ export default function CheckoutPage() {
         name: item.title,
         price: item.price,
         type: item.type,
-        quantity: item.quantity, // Make sure quantity is included
-        title: item.title // Ensure title is also included
+        quantity: item.quantity,
+        title: item.title,
+        imageUrl: item.imageUrl || `/api/placeholder/100/100`
       }));
       const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
 

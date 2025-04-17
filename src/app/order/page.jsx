@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
-export default function OrderPage() {
+function OrderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [orderDetails, setOrderDetails] = useState(null);
@@ -260,7 +260,13 @@ export default function OrderPage() {
                   <tr key={index} className={index < orderDetails.items.length - 1 ? "border-b" : ""}>
                     <td className="py-4 px-4">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gray-200 rounded-md mr-3"></div>
+                        <div className="w-12 h-12 rounded-md mr-3">
+                          <img 
+                            src={item.imageUrl || `/api/placeholder/100/100`} 
+                            alt={item.name || item.title} 
+                            className="w-full h-full object-cover rounded-md" 
+                          />
+                        </div>
                         <div>
                           <p className="font-medium">{item.name || item.title}</p>
                           <p className="text-xs">{item.type || ""}</p>
@@ -348,5 +354,24 @@ export default function OrderPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function OrderLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+        <p className="mt-4 text-black">Loading order details...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function OrderPage() {
+  return (
+    <Suspense fallback={<OrderLoading />}>
+      <OrderContent />
+    </Suspense>
   );
 }
