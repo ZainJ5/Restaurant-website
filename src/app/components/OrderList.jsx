@@ -133,6 +133,7 @@ export default function OrderList() {
     const createdAt = order.createdAt
       ? new Date(order.createdAt).toLocaleString()
       : "";
+    const orderType = order.orderType ? order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1) : "Delivery";
 
     const printStyles = `
       <style>
@@ -176,6 +177,7 @@ export default function OrderList() {
                 ? `<p><strong>Email:</strong> ${order.email}</p>`
                 : ""
             }
+            <p><strong>Order Type:</strong> ${orderType}</p>
             ${
               order.deliveryAddress
                 ? `<p><strong>Address:</strong> ${order.deliveryAddress}</p>`
@@ -358,6 +360,7 @@ export default function OrderList() {
                 <th className="p-2 border text-left">Sr No</th>
                 <th className="p-2 border text-left">Order No</th>
                 <th className="p-2 border text-left">Customer Name</th>
+                <th className="p-2 border text-left">Type</th>
                 <th className="p-2 border text-left w-24">Area</th>
                 <th className="p-2 border text-left">Amount</th>
                 <th className="p-2 border text-left">Status</th>
@@ -373,12 +376,16 @@ export default function OrderList() {
                 const srNo = ((currentPage - 1) * ordersPerPage + index + 1)
                   .toString()
                   .padStart(2, "0");
+                const orderType = order.orderType 
+                  ? order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1) 
+                  : "Delivery";
 
                 return (
                   <tr key={idVal} className="hover:bg-gray-100">
                     <td className="p-2 border">{srNo}</td>
                     <td className="p-2 border">{orderNumber}</td>
                     <td className="p-2 border">{order.fullName}</td>
+                    <td className="p-2 border">{orderType}</td>
                     <td className="p-2 border w-24">
                       {order.branch1 ? String(extractValue(order.branch)) : "Clifton"}
                     </td>
@@ -472,6 +479,11 @@ export default function OrderList() {
                 <strong>Email:</strong> {selectedOrder.email}
               </p>
             )}
+            <p>
+              <strong>Order Type:</strong> {selectedOrder.orderType 
+                ? selectedOrder.orderType.charAt(0).toUpperCase() + selectedOrder.orderType.slice(1)
+                : "Delivery"}
+            </p>
             {selectedOrder.deliveryAddress && (
               <p>
                 <strong>Address:</strong> {selectedOrder.deliveryAddress}

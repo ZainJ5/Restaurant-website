@@ -39,7 +39,6 @@ export default function CartButton() {
         </button>
       </div>
 
-      {/* Mobile version remains fixed */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white p-2">
         <button
           onClick={() => setIsCartOpen(true)}
