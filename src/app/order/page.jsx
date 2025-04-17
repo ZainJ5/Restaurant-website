@@ -1,17 +1,16 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-function OrderContent() {
+function OrderContent({ searchParams }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const orderId = searchParams.get('id');
+    const orderId = searchParams?.id;
 
     if (orderId) {
       fetchOrderDetails(orderId);
@@ -368,10 +367,10 @@ function OrderLoading() {
   );
 }
 
-export default function OrderPage() {
+export default function OrderPage({ searchParams }) {
   return (
     <Suspense fallback={<OrderLoading />}>
-      <OrderContent />
+      <OrderContent searchParams={searchParams} />
     </Suspense>
   );
 }
