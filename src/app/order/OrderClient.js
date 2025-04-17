@@ -223,7 +223,7 @@ function OrderContent({ searchParams }) {
                 </div>
                 <div>
                   <p>Location:</p>
-                  <p>{orderDetails.area || "Lahore"}</p>
+                  <p>{"Clifton"}</p>
                 </div>
               </div>
             </div>
@@ -240,7 +240,7 @@ function OrderContent({ searchParams }) {
                 </div>
                 <div>
                   <p>Estimated Delivery:</p>
-                  <p>{orderDetails.estimatedDelivery || "Within 45 Minutes"}</p>
+                  <p>{"Within 30-45 Minutes"}</p>
                 </div>
               </div>
             </div>
@@ -343,13 +343,6 @@ function OrderContent({ searchParams }) {
             <div className="mb-4 md:mb-0">
               <img src="/logo.png" alt="Logo" className="h-10 w-10 rounded-full inline-block mr-2" />
               <h3 className="font-medium inline-block text-black">Tipu Burger and Broast</h3>
-            </div>
-            <div className="flex flex-wrap justify-center space-x-4 text-sm text-black">
-              <a href="#" className="hover:text-gray-900 mb-2 md:mb-0">Delivery Hours</a>
-              <a href="#" className="hover:text-gray-900 mb-2 md:mb-0">Delivery Locations</a>
-              <a href="#" className="hover:text-gray-900 mb-2 md:mb-0">Store Timings</a>
-              <a href="#" className="hover:text-gray-900 mb-2 md:mb-0">About us</a>
-              <a href="#" className="hover:text-gray-900 mb-2 md:mb-0">My Profile</a>
             </div>
           </div>
         </div>
