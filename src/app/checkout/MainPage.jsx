@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaCreditCard, FaMoneyBill, FaCheckCircle } from "react-icons/fa";
+import { FaCreditCard, FaMoneyBill } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useOrderTypeStore } from "../../store/orderTypeStore";
 import { useCartStore } from "../../store/cart";
@@ -28,8 +28,6 @@ export default function CheckoutPage() {
   const [promoCodes, setPromoCodes] = useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState(0);
   const [receiptFile, setReceiptFile] = useState(null);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [orderDetails, setOrderDetails] = useState(null);
 
   const [paymentType, setPaymentType] = useState("cod");
   const [onlineOption, setOnlineOption] = useState(null);
@@ -186,6 +184,8 @@ export default function CheckoutPage() {
         name: item.title,
         price: item.price,
         type: item.type,
+        quantity: item.quantity, // Make sure quantity is included
+        title: item.title // Ensure title is also included
       }));
       const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
 
@@ -231,23 +231,42 @@ export default function CheckoutPage() {
       const data = await response.json();
       console.log("Order placed successfully:", data);
       
-      // Set order details and success state
-      setOrderDetails({
-        orderId: data.orderId || `ORD-${Math.floor(Math.random() * 10000)}`,
+      // Create order details object to save in session storage
+      const orderDetails = {
+        orderId: data.orderId || `ORD-${Date.now()}`,
+        orderDate: new Date().toISOString(),
+        status: 'Confirmed',
+        estimatedDelivery: 'Within 1 hour',
         customerName: fullName,
-        items: items,
-        total: grandTotal,
+        fullName: fullName,
+        mobileNumber: mobileNumber,
+        email: email,
         deliveryAddress: completeAddress,
-        paymentMethod: paymentType === "cod" ? "Cash on Delivery" : onlineOption === "easypaisa" ? "EasyPaisa" : onlineOption === "jazzcash" ? "JazzCash" : "Bank Transfer",
-        estimatedDelivery: new Date(Date.now() + 60 * 60 * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), // Estimated 1 hour delivery time
-        branch: branch?.name || "Main Branch",
-      });
+        nearestLandmark: nearestLandmark,
+        area: selectedArea.name,
+        branch: branch?.name || 'Main Branch',
+        paymentMethod: paymentType === 'cod' ? 'Cash on Delivery' : 'Online Payment',
+        bankName: paymentType === 'online' ? (
+          onlineOption === 'easypaisa' ? 'EasyPaisa' : 
+          onlineOption === 'jazzcash' ? 'JazzCash' : 
+          'Bank Transfer'
+        ) : undefined,
+        subtotal: subtotal,
+        deliveryFee: deliveryFee,
+        discount: appliedDiscount,
+        total: grandTotal,
+        items: orderItems
+      };
       
-      setOrderSuccess(true);
+      // Save order details to session storage
+      sessionStorage.setItem('lastOrder', JSON.stringify(orderDetails));
+      
       clearCart();
+      resetFormFields();
       
-      // Don't navigate away immediately - let user see the thank you card
-      // router.push("/");
+      // Redirect to order confirmation page instead of home page
+      router.push("/order");
+      
       toast.success("Your order has been placed successfully!", {
         style: { background: "#16a34a", color: "#ffffff" },
       });
@@ -280,83 +299,6 @@ export default function CheckoutPage() {
     setReceiptFile(null);
     setChangeRequest("");
   };
-  
-  // Thank You Card Component
-  const ThankYouCard = () => {
-    if (!orderDetails) return null;
-    
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full mx-auto animate-fadeIn">
-          <div className="text-center mb-6">
-            <FaCheckCircle className="mx-auto text-green-500 text-5xl mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800">Thank You!</h2>
-            <p className="text-gray-600 mt-2">Your order has been placed successfully</p>
-          </div>
-          
-          <div className="border-t border-b py-4 my-4">
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Order ID:</span>
-              <span>{orderDetails.orderId}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Customer:</span>
-              <span>{orderDetails.customerName}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Amount:</span>
-              <span>Rs. {orderDetails.total}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Payment Method:</span>
-              <span>{orderDetails.paymentMethod}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Delivery Address:</span>
-              <span className="text-right">{orderDetails.deliveryAddress}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-semibold">Estimated Delivery:</span>
-              <span>Around {orderDetails.estimatedDelivery}</span>
-            </div>
-          </div>
-          
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-600 mb-4">
-              A confirmation has been sent to your phone via SMS. 
-              You can track your order status on our website.
-            </p>
-            
-            <div className="grid grid-cols-2 gap-4">
-              {/* <button 
-                onClick={() => {
-                  setOrderSuccess(false);
-                  router.push('/orders');
-                }}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-              >
-                Track Order
-              </button> */}
-              <button 
-                onClick={() => {
-                  setOrderSuccess(false);
-                  router.push('/');
-                }}
-                className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300"
-              >
-                Continue Shopping
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // If order is successful, show the thank you card
-  if (orderSuccess) {
-    return <ThankYouCard />;
-  }
 
   return (
     <>
