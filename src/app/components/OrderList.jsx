@@ -278,10 +278,12 @@ export default function OrderList() {
   });
 
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-  const currentOrders = filteredOrders.slice(
+  const reversedOrders = [...filteredOrders].reverse(); // make a reversed copy
+  const currentOrders = reversedOrders.slice(
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
+  
 
   const handlePageChange = (pageNum) => {
     setCurrentPage(pageNum);
