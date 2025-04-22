@@ -1,4 +1,5 @@
 export const areasOfLahore = [
+  { name: "Select - If Pick Up Order", fee: 0 },
   { name: "Dehli Colony", fee: 0 },
   { name: "Gizri", fee: 50 },
   { name: "Clifton Block 1", fee: 60 },

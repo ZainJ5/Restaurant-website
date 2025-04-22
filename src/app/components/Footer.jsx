@@ -4,9 +4,6 @@ import { Autoplay } from 'swiper/modules'
 import 'swiper/css'
 
 export default function Footer() {
-  const openWhatsApp = () => {
-    window.open('https://wa.me/923334928431', '_blank');
-  };
   return (
     <footer className="bg-white border-t">
       <div className="max-w-7xl mx-auto px-4 pb-12 sm:px-6 lg:px-8 relative">
@@ -154,10 +151,18 @@ export default function Footer() {
       <div className="bg-[rgb(76,76,76)] py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between text-sm text-white space-y-4 sm:space-y-0">
-          <p className="cursor-pointer hover:underline" onClick={openWhatsApp}>
-            Powered by DevX.
-          </p>
-          <div className="space-x-4">
+            <p>
+              © 2025 Tipu Burger &amp; Broast. All Rights Reserved. Develop by{" "}
+              <a
+                href="https://wa.me/923142300331"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                ZABS Creatives
+              </a>
+            </p>
+            <div className="space-x-4">
               <Link href="/terms" className="hover:underline">
                 Terms &amp; Conditions
               </Link>
