@@ -9,8 +9,23 @@ function OrderContent({ searchParams }) {
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orderCount, setOrderCount] = useState(0);
+  const fetchOrderCount = async () => {
+    try {
+      const res = await fetch('/api/orders');
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : [];
+      if (Array.isArray(data)) {
+        setOrderCount(data.length);
+      }
+    } catch (error) {
+      console.error("Failed to fetch order count:", error);
+    }
+  };
+  
 
   useEffect(() => {
+    fetchOrderCount(); 
     const orderId = searchParams?.id;
 
     if (orderId) {
@@ -45,6 +60,7 @@ function OrderContent({ searchParams }) {
       setLoading(false);
     }
   };
+  const orderDisplayId = `tipu-${(orderCount ).toString().padStart(3, '0')}`;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -144,7 +160,7 @@ function OrderContent({ searchParams }) {
           <div className="flex items-center space-x-2">
             <span className="text-black">Orders</span>
             <span className="text-black">&gt;</span>
-            <span className="font-medium text-black">{orderDetails.orderId}</span>
+            <span className="font-medium text-black">{orderDisplayId}</span>
           </div>
           <button
             onClick={() => window.print()}
@@ -159,7 +175,7 @@ function OrderContent({ searchParams }) {
         <div className="bg-white shadow-sm rounded-md p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4">
             <div>
-              <h2 className="text-xl font-bold text-black">Order# {orderDetails.orderId}</h2>
+              <h2 className="text-xl font-bold text-black">Order# {orderDisplayId}</h2>
               <p className="text-sm text-black">Ordered from Web</p>
             </div>
             <div className="mt-2 md:mt-0">
@@ -292,7 +308,7 @@ function OrderContent({ searchParams }) {
                 </div>
                 <div className="flex justify-between">
                   <span>Discount:</span>
-                  <span className="font-medium">- Rs. {orderDetails.discount}</span>
+                  <span className="font-medium">- Rs. {parseInt(orderDetails.discount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Fee:</span>
