@@ -10,7 +10,7 @@ export default function Footer() {
         <Link href="/">
           <div className="relative rounded-full border-4 border-yellow-400 w-32 h-32 
                           bg-white absolute left-1/2 top-[0px] transform -translate-x-1/2 -translate-y-1/2 z-10 overflow-hidden">
-            <img src="/logo.png" alt="Logo" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+            <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         </Link>
 
@@ -80,7 +80,7 @@ export default function Footer() {
           spaceBetween={0}
           slidesPerView={2}
           breakpoints={{
-            768: { 
+            768: {
               slidesPerView: 4,
             },
           }}
@@ -95,13 +95,16 @@ export default function Footer() {
           speed={1000}
           allowTouchMove={true}
         >
-          {Array.from({ length: 17 }, (_, i) => i + 1).map((num) => (
-            <SwiperSlide key={num}>
-              <div className="relative w-full h-58 object-cover">
-                <img src={`/${num}.webp`} alt={`Image ${num}`} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-              </div>
-            </SwiperSlide>
-          ))}
+          {Array.from({ length: 17 }, (_, i) => i + 1)
+            .filter((num) => num !== 4)
+            .map((num) => (
+              <SwiperSlide key={num}>
+                <div className="relative w-full h-58 object-cover">
+                  <img src={`/${num}.webp`} alt={`Image ${num}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              </SwiperSlide>
+            ))}
+
         </Swiper>
       </div>
 

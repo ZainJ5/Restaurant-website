@@ -235,7 +235,7 @@ function OrderContent({ searchParams }) {
                 </div>
                 <div>
                   <p>Phone Number:</p>
-                  <p>+923462838244</p>
+                  <p>03462838244</p>
                 </div>
                 <div>
                   <p>Location:</p>
