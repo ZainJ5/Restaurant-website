@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaCreditCard, FaMoneyBill } from "react-icons/fa";
+import { FaCreditCard, FaMoneyBill, FaClock } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useOrderTypeStore } from "../../store/orderTypeStore";
 import { useCartStore } from "../../store/cart";
@@ -28,6 +28,7 @@ export default function CheckoutPage() {
   const [appliedDiscount, setAppliedDiscount] = useState(0);
   const [receiptFile, setReceiptFile] = useState(null);
   const [deliveryAreas, setDeliveryAreas] = useState([]);
+  const [pickupTime, setPickupTime] = useState("20"); // new state for pickup time
 
   const [paymentType, setPaymentType] = useState("cod");
   const [onlineOption, setOnlineOption] = useState(null);
@@ -37,7 +38,7 @@ export default function CheckoutPage() {
   const { items, total, clearCart } = useCartStore();
   const subtotal = total;
   const tax = 0;
-  const deliveryFee = selectedArea ? selectedArea.fee : 0;
+  const deliveryFee = orderType === "delivery" && selectedArea ? selectedArea.fee : 0;
   const grandTotal = subtotal + tax + deliveryFee - appliedDiscount;
 
   const easypaisaDetails = {
@@ -104,8 +105,10 @@ export default function CheckoutPage() {
       }
     }
     fetchPromoCodes();
-    fetchDeliveryAreas();
-  }, []);
+    if (orderType === "delivery") {
+      fetchDeliveryAreas();
+    }
+  }, [orderType]);
 
   useEffect(() => {
     setAppliedDiscount(subtotal * 0.1);
@@ -143,44 +146,52 @@ export default function CheckoutPage() {
       });
       return;
     }
-    if (!fullName.trim() || !mobileNumber.trim() || !deliveryAddress.trim()) {
+    
+    // Common validation for both order types
+    if (!fullName.trim() || !mobileNumber.trim()) {
       toast.error("Please fill in all required fields.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
     }
+    
     const phoneRegex = /^03[0-9]{9}$/;
     if (!phoneRegex.test(mobileNumber.trim())) {
-      alert("Please enter a valid number");
       toast.error("Please enter a valid number", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
     }
+    
     if (!branch || !orderType) {
       toast.error("Please select your branch and order type.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
     }
-    if (!selectedArea) {
-      toast.error("Please select your delivery area.", {
+    
+    // Order type specific validation
+    if (orderType === "delivery" && (!deliveryAddress.trim() || !selectedArea)) {
+      toast.error("Please enter your delivery address and select an area.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
     }
+    
     if (subtotal < 500) {
       toast.error("Minimum order value is Rs. 500. Please add more items to your order.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
     }
+    
     if (grandTotal < 0) {
       toast.error("The total amount cannot be negative. Please review your order.", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
       return;
     }
+    
     if (paymentType === "online") {
       if (!onlineOption) {
         toast.error("Please select an online payment option.", {
@@ -195,6 +206,7 @@ export default function CheckoutPage() {
         return;
       }
     }
+    
     setIsSubmitting(true);
 
     try {
@@ -207,14 +219,25 @@ export default function CheckoutPage() {
         title: item.title,
         imageUrl: item.imageUrl || `/api/placeholder/100/100`,
       }));
-      const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
-
+      
       const formData = new FormData();
       formData.append("fullName", fullName);
       formData.append("mobileNumber", mobileNumber);
-      formData.append("alternateMobile", alternateMobile);
-      formData.append("deliveryAddress", completeAddress);
-      formData.append("nearestLandmark", nearestLandmark);
+      formData.append("orderType", orderType);
+      formData.append("branch", branch?._id);
+      
+      // Add order-type specific data
+      if (orderType === "delivery") {
+        const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
+        formData.append("alternateMobile", alternateMobile);
+        formData.append("deliveryAddress", completeAddress);
+        formData.append("nearestLandmark", nearestLandmark);
+        formData.append("area", selectedArea.name);
+      } else if (orderType === "pickup") {
+        formData.append("pickupTime", pickupTime + " minutes");
+      }
+      
+      // Common fields
       formData.append("email", email);
       formData.append("paymentInstructions", paymentInstructions);
       formData.append("paymentMethod", paymentType);
@@ -225,9 +248,6 @@ export default function CheckoutPage() {
       formData.append("promoCode", promoCode);
       formData.append("isGift", isGift ? "true" : "false");
       formData.append("giftMessage", giftMessage);
-      formData.append("orderType", orderType);
-      formData.append("branch", branch?._id);
-      formData.append("area", selectedArea.name);
       formData.append("items", JSON.stringify(orderItems));
       formData.append("changeRequest", changeRequest);
 
@@ -256,14 +276,12 @@ export default function CheckoutPage() {
         orderId: data.orderId || `ORD-${Date.now()}`,
         orderDate: new Date().toISOString(),
         status: "Confirmed",
-        estimatedDelivery: "Within 1 hour",
+        estimatedDelivery: orderType === "delivery" ? "Within 1 hour" : `Ready in ${pickupTime} minutes`,
         customerName: fullName,
         fullName: fullName,
         mobileNumber: mobileNumber,
         email: email,
-        deliveryAddress: completeAddress,
-        nearestLandmark: nearestLandmark,
-        area: selectedArea.name,
+        orderType: orderType,
         branch: branch?.name || "Main Branch",
         paymentMethod: paymentType === "cod" ? "Cash on Delivery" : "Online Payment",
         bankName:
@@ -280,6 +298,15 @@ export default function CheckoutPage() {
         total: grandTotal,
         items: orderItems,
       };
+      
+      // Add order-type specific details to session storage
+      if (orderType === "delivery") {
+        orderDetails.deliveryAddress = deliveryAddress + ", " + selectedArea?.name;
+        orderDetails.nearestLandmark = nearestLandmark;
+        orderDetails.area = selectedArea?.name;
+      } else if (orderType === "pickup") {
+        orderDetails.pickupTime = pickupTime + " minutes";
+      }
 
       // Save order details to session storage
       sessionStorage.setItem("lastOrder", JSON.stringify(orderDetails));
@@ -321,6 +348,7 @@ export default function CheckoutPage() {
     setSelectedArea(null);
     setReceiptFile(null);
     setChangeRequest("");
+    setPickupTime("20");
   };
 
   return (
@@ -339,13 +367,18 @@ export default function CheckoutPage() {
                     Checkout
                   </h1>
                   <p className="text-sm sm:text-base text-gray-600">
-                    This is a Delivery Order <span className="text-red-600">🚚</span>
+                    {orderType === "delivery" ? (
+                      <>This is a Delivery Order <span className="text-red-600">🚚</span></>
+                    ) : (
+                      <>This is a Pickup Order <span className="text-red-600">🏪</span></>
+                    )}
                     <br />
                     Just a last step, please enter your details:
                   </p>
                 </div>
               </div>
               <div className="space-y-4">
+                {/* Common fields for both order types */}
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div className="sm:col-span-1">
                     <label className="block text-sm text-gray-700 mb-1">Title</label>
@@ -372,6 +405,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                 </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-700 mb-1">
@@ -386,66 +420,107 @@ export default function CheckoutPage() {
                       pattern="^03[0-9]{9}$"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Alternate Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={alternateMobile}
-                      onChange={(e) => setAlternateMobile(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                      placeholder="03xx-xxxxxxx"
-                    />
-                  </div>
+                  {orderType === "pickup" ? (
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Pick Up Time <span className="text-red-500">*Required</span>
+                      </label>
+                      <select
+                        value={pickupTime}
+                        onChange={(e) => setPickupTime(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      >
+                        <option value="20">20 minutes</option>
+                        <option value="25">25 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="35">35 minutes</option>
+                        <option value="40">40 minutes</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Alternate Mobile Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={alternateMobile}
+                        onChange={(e) => setAlternateMobile(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                        placeholder="03xx-xxxxxxx"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">
-                    Delivery Address <span className="text-red-500">*Required</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={deliveryAddress}
-                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                    placeholder="Enter your complete address"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">
-                    Select Area <span className="text-red-500">*Required</span>
-                  </label>
-                  <select
-                    value={selectedArea ? selectedArea.name : ""}
-                    onChange={(e) => {
-                      const selected = deliveryAreas.find(
-                        (area) => area.name === e.target.value
-                      );
-                      setSelectedArea(selected);
-                    }}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                  >
-                    <option value="">Select an area</option>
-                    {deliveryAreas.map((area) => (
-                      <option key={area._id} value={area.name}>
-                        {area.name} (Fee: Rs. {area.fee})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Nearest Landmark
-                    </label>
-                    <input
-                      type="text"
-                      value={nearestLandmark}
-                      onChange={(e) => setNearestLandmark(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
-                      placeholder="Any famous place nearby"
-                    />
-                  </div>
+
+                {/* Delivery specific fields */}
+                {orderType === "delivery" && (
+                  <>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Delivery Address <span className="text-red-500">*Required</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                        placeholder="Enter your complete address"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Select Area <span className="text-red-500">*Required</span>
+                      </label>
+                      <select
+                        value={selectedArea ? selectedArea.name : ""}
+                        onChange={(e) => {
+                          const selected = deliveryAreas.find(
+                            (area) => area.name === e.target.value
+                          );
+                          setSelectedArea(selected);
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                      >
+                        <option value="">Select an area</option>
+                        {deliveryAreas.map((area) => (
+                          <option key={area._id} value={area.name}>
+                            {area.name} (Fee: Rs. {area.fee})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Nearest Landmark
+                        </label>
+                        <input
+                          type="text"
+                          value={nearestLandmark}
+                          onChange={(e) => setNearestLandmark(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                          placeholder="Any famous place nearby"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
+                          placeholder="Enter your email"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Pickup specific fields */}
+                {orderType === "pickup" && (
                   <div>
                     <label className="block text-sm text-gray-700 mb-1">
                       Email Address
@@ -458,7 +533,9 @@ export default function CheckoutPage() {
                       placeholder="Enter your email"
                     />
                   </div>
-                </div>
+                )}
+
+                {/* Common fields continued */}
                 <div>
                   <label className="block text-sm text-gray-700 mb-1">
                     Payment Instructions
@@ -490,7 +567,7 @@ export default function CheckoutPage() {
                       }`}
                     >
                       <FaMoneyBill className="text-green-500" size={24} />
-                      <span>Cash on Delivery</span>
+                      <span>Cash on {orderType === "delivery" ? "Delivery" : "Pickup"}</span>
                     </button>
                     <button
                       type="button"
@@ -709,10 +786,12 @@ export default function CheckoutPage() {
                   <span>Tax (0%)</span>
                   <span>Rs. {tax}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Delivery Fee</span>
-                  <span>Rs. {deliveryFee}</span>
-                </div>
+                {orderType === "delivery" && (
+                  <div className="flex justify-between">
+                    <span>Delivery Fee</span>
+                    <span>Rs. {deliveryFee}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-yellow-500">
                   <span>Discount</span>
                   <span>Rs. {appliedDiscount}</span>
