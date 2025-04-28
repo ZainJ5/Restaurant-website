@@ -9,9 +9,9 @@ export default function OrderList() {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
 
-  const [dateFilter, setDateFilter] = useState("all"); 
-  const [customDate, setCustomDate] = useState("");    
-  const [typeFilter, setTypeFilter] = useState("all"); 
+  const [dateFilter, setDateFilter] = useState("today"); // Changed to "today"
+  const [customDate, setCustomDate] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const extractValue = (field) => {
     if (typeof field === "object" && field !== null) {
@@ -118,7 +118,7 @@ export default function OrderList() {
     const newWindow = window.open("", "_blank", "width=800,height=600");
     const itemsList = order.items
       .map((item) => {
-        const price = extractValue(item.price);
+        const price = extractValue  (item.price);
         return `<li>${item.name} - ${price} Rs ${
           item.type ? `(Type: ${item.type})` : ""
         }</li>`;
@@ -133,7 +133,9 @@ export default function OrderList() {
     const createdAt = order.createdAt
       ? new Date(order.createdAt).toLocaleString()
       : "";
-    const orderType = order.orderType ? order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1) : "Delivery";
+    const orderType = order.orderType
+      ? order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1)
+      : "Delivery";
 
     const printStyles = `
       <style>
@@ -278,12 +280,11 @@ export default function OrderList() {
   });
 
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-  const reversedOrders = [...filteredOrders].reverse(); // make a reversed copy
+  const reversedOrders = [...filteredOrders].reverse();
   const currentOrders = reversedOrders.slice(
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
-  
 
   const handlePageChange = (pageNum) => {
     setCurrentPage(pageNum);
@@ -378,8 +379,9 @@ export default function OrderList() {
                 const srNo = ((currentPage - 1) * ordersPerPage + index + 1)
                   .toString()
                   .padStart(2, "0");
-                const orderType = order.orderType 
-                  ? order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1) 
+                const orderType = order.orderType
+                  ? order.orderType.charAt(0).toUpperCase() +
+                    order.orderType.slice(1)
                   : "Delivery";
 
                 return (
@@ -389,7 +391,7 @@ export default function OrderList() {
                     <td className="p-2 border">{order.fullName}</td>
                     <td className="p-2 border">{orderType}</td>
                     <td className="p-2 border w-24">
-                      {order.branch1 ? String(extractValue(order.branch)) : "Clifton"}
+                      {order.branch ? String(extractValue(order.branch)) : "Clifton"}
                     </td>
                     <td className="p-2 border">
                       {extractValue(order.total) || 0}/-
@@ -439,13 +441,15 @@ export default function OrderList() {
             </tbody>
           </table>
 
-          <div className="flex justify-center mt-4 space-x-2">
+          <div className="flex mt-4 space-x-2 justify-start flex-wrap">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
                 className={`px-3 py-1 border rounded ${
-                  currentPage === page ? "bg-blue-600 text-white" : "bg-white text-black"
+                  currentPage === page
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-black"
                 }`}
               >
                 {page}
@@ -462,7 +466,7 @@ export default function OrderList() {
               onClick={closeModal}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
             >
-              &times;
+              ×
             </button>
             <h3 className="text-xl font-bold mb-4">Order Details</h3>
             <p>
@@ -473,7 +477,8 @@ export default function OrderList() {
             </p>
             {selectedOrder.alternateMobile && (
               <p>
-                <strong>Alternate Mobile:</strong> {selectedOrder.alternateMobile}
+                <strong>Alternate Mobile:</strong>{" "}
+                {selectedOrder.alternateMobile}
               </p>
             )}
             {selectedOrder.email && (
@@ -482,8 +487,10 @@ export default function OrderList() {
               </p>
             )}
             <p>
-              <strong>Order Type:</strong> {selectedOrder.orderType 
-                ? selectedOrder.orderType.charAt(0).toUpperCase() + selectedOrder.orderType.slice(1)
+              <strong>Order Type:</strong>{" "}
+              {selectedOrder.orderType
+                ? selectedOrder.orderType.charAt(0).toUpperCase() +
+                  selectedOrder.orderType.slice(1)
                 : "Delivery"}
             </p>
             {selectedOrder.deliveryAddress && (
@@ -493,7 +500,8 @@ export default function OrderList() {
             )}
             {selectedOrder.nearestLandmark && (
               <p>
-                <strong>Nearest Landmark:</strong> {selectedOrder.nearestLandmark}
+                <strong>Nearest Landmark:</strong>{" "}
+                {selectedOrder.nearestLandmark}
               </p>
             )}
             <p>
@@ -517,13 +525,15 @@ export default function OrderList() {
             </div>
             <div className="mt-4">
               <p>
-                <strong>Subtotal:</strong> {extractValue(selectedOrder.subtotal)} Rs
+                <strong>Subtotal:</strong>{" "}
+                {extractValue(selectedOrder.subtotal)} Rs
               </p>
               <p>
                 <strong>Tax:</strong> {extractValue(selectedOrder.tax)} Rs
               </p>
               <p>
-                <strong>Discount:</strong> {extractValue(selectedOrder.discount)} Rs
+                <strong>Discount:</strong>{" "}
+                {extractValue(selectedOrder.discount)} Rs
               </p>
               <p>
                 <strong>Total:</strong> {extractValue(selectedOrder.total)} Rs

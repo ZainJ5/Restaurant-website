@@ -159,7 +159,7 @@ export default function FoodItemList() {
   };
 
   const handleEditClick = (item) => {
-    setOriginalItemData(item);
+    setOriginalItemData(null);
     const categoryId =
       typeof item.category === "object" && item.category !== null
         ? extractValue(item.category._id)
@@ -325,81 +325,82 @@ export default function FoodItemList() {
     setEditImage(null);
   };
 
-  if (loading) return <p className="text-center text-gray-600">Loading food items...</p>;
-  if (foodItems.length === 0) return <p className="text-center text-gray-600">No food items available.</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-lg text-gray-600 animate-pulse">Loading food items...</p>
+    </div>
+  );
+  if (foodItems.length === 0) return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-lg text-gray-600">No food items available.</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Filters Section */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Filter Items</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Search</label>
+      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Filter Items</h2>
+        <div className="flex flex-col md:flex-row gap-3 items-center">
+          <div className="relative flex-1">
             <input
               type="text"
               name="search"
               value={filters.search}
               onChange={handleFilterChange}
               placeholder="Search by title or description"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-300"
             />
+            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Branch</label>
-            <select
-              name="branch"
-              value={filters.branch}
-              onChange={handleFilterChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            >
-              <option value="">All Branches</option>
-              {branches.map((branch) => (
-                <option key={extractValue(branch._id)} value={extractValue(branch._id)}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
-            <select
-              name="category"
-              value={filters.category}
-              onChange={handleFilterChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={extractValue(category._id)} value={extractValue(category._id)}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Subcategory</label>
-            <select
-              name="subcategory"
-              value={filters.subcategory}
-              onChange={handleFilterChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            >
-              <option value="">All Subcategories</option>
-              {subcategories.map((subcategory) => (
-                <option key={extractValue(subcategory._id)} value={extractValue(subcategory._id)}>
-                  {subcategory.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            name="branch"
+            value={filters.branch}
+            onChange={handleFilterChange}
+            className="flex-1 py-2 px-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-300"
+          >
+            <option value="">All Branches</option>
+            {branches.map((branch) => (
+              <option key={extractValue(branch._id)} value={extractValue(branch._id)}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+          <select
+            name="category"
+            value={filters.category}
+            onChange={handleFilterChange}
+            className="flex-1 py-2 px-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-300"
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={extractValue(category._id)} value={extractValue(category._id)}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          <select
+            name="subcategory"
+            value={filters.subcategory}
+            onChange={handleFilterChange}
+            className="flex-1 py-2 px-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-300"
+          >
+            <option value="">All Subcategories</option>
+            {subcategories.map((subcategory) => (
+              <option key={extractValue(subcategory._id)} value={extractValue(subcategory._id)}>
+                {subcategory.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={resetFilters}
+            className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-medium"
+          >
+            Reset
+          </button>
         </div>
-        <button
-          onClick={resetFilters}
-          className="mt-4 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150"
-        >
-          Reset Filters
-        </button>
       </div>
 
       {/* Food Items List */}
@@ -410,7 +411,7 @@ export default function FoodItemList() {
 
           if (editingItemId === id) {
             return (
-              <div key={id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+              <div key={id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <form onSubmit={handleEditSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Title</label>
@@ -420,7 +421,7 @@ export default function FoodItemList() {
                       value={editData.title}
                       onChange={handleEditChange}
                       placeholder="Title"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm py-2 px-3"
                     />
                   </div>
                   <div>
@@ -430,7 +431,7 @@ export default function FoodItemList() {
                       value={editData.description}
                       onChange={handleEditChange}
                       placeholder="Description"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm py-2 px-3"
                     ></textarea>
                   </div>
                   {(!editData.variations || editData.variations.length === 0) && (
@@ -442,7 +443,7 @@ export default function FoodItemList() {
                         value={editData.price}
                         onChange={handleEditChange}
                         placeholder="Price"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm py-2 px-3"
                       />
                     </div>
                   )}
@@ -453,7 +454,7 @@ export default function FoodItemList() {
                       name="category"
                       value={editData.category}
                       disabled
-                      className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
+                      className="mt-1 block w-full rounded-lg border-gray-200 bg-gray-100 text-sm py-2 px-3"
                     />
                   </div>
                   <div>
@@ -463,7 +464,7 @@ export default function FoodItemList() {
                       name="subcategory"
                       value={editData.subcategory}
                       disabled
-                      className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
+                      className="mt-1 block w-full rounded-lg border-gray-200 bg-gray-100 text-sm py-2 px-3"
                     />
                   </div>
                   <div>
@@ -473,16 +474,16 @@ export default function FoodItemList() {
                       name="branch"
                       value={editData.branch}
                       disabled
-                      className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
+                      className="mt-1 block w-full rounded-lg border-gray-200 bg-gray-100 text-sm py-2 px-3"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-lg font-semibold text-gray-800">Variations</h3>
+                      <h3 className="text-sm font-semibold text-gray-800">Variations</h3>
                       <button
                         type="button"
                         onClick={addVariation}
-                        className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition duration-150"
+                        className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-all duration-300 text-sm"
                       >
                         Add Variation
                       </button>
@@ -492,14 +493,14 @@ export default function FoodItemList() {
                         {editData.variations.map((variation, index) => (
                           <div
                             key={index}
-                            className="flex flex-wrap gap-2 items-center p-2 border rounded-md"
+                            className="flex flex-wrap gap-2 items-center p-2 border rounded-lg"
                           >
                             <input
                               type="text"
                               value={variation.name || ""}
                               onChange={(e) => handleVariationChange(index, "name", e.target.value)}
                               placeholder="Variation Name"
-                              className="flex-1 border p-2 rounded-md min-w-[150px]"
+                              className="flex-1 border p-2 rounded-lg min-w-[150px] text-sm"
                             />
                             <input
                               type="number"
@@ -508,12 +509,12 @@ export default function FoodItemList() {
                                 handleVariationChange(index, "price", e.target.value)
                               }
                               placeholder="Price"
-                              className="w-24 border p-2 rounded-md"
+                              className="w-24 border p-2 rounded-lg text-sm"
                             />
                             <button
                               type="button"
                               onClick={() => removeVariation(index)}
-                              className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition duration-150"
+                              className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-all duration-300 text-sm"
                             >
                               Remove
                             </button>
@@ -532,20 +533,20 @@ export default function FoodItemList() {
                       type="file"
                       name="foodImage"
                       onChange={handleImageChange}
-                      className="mt-1 block w-full rounded-md border-gray-300"
+                      className="mt-1 block w-full rounded-lg border-gray-200 text-sm"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-150"
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-300 text-sm font-medium"
                     >
                       Save
                     </button>
                     <button
                       type="button"
                       onClick={handleCancelEdit}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-150"
+                      className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all duration-300 text-sm font-medium"
                     >
                       Cancel
                     </button>
@@ -558,32 +559,32 @@ export default function FoodItemList() {
           return (
             <div
               key={id}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row items-center gap-4"
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row items-start gap-4"
             >
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
                   alt={item.title}
-                  className="w-32 h-32 object-cover rounded-md"
+                  className="w-24 h-24 object-cover rounded-lg"
                 />
               ) : (
-                <div className="w-32 h-32 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
+                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-sm">
                   No Image
                 </div>
               )}
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-800">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
+                <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+                <p className="text-gray-600 text-sm mt-1">{item.description}</p>
                 {(!item.variations || item.variations.length === 0) && (
-                  <p className="font-semibold text-gray-800">{price} Rs</p>
+                  <p className="font-semibold text-gray-800 mt-2">{price} Rs</p>
                 )}
                 {item.branch &&
                 typeof item.branch === "object" &&
                 item.branch.name ? (
-                  <p className="text-sm text-gray-600">Branch: {item.branch.name}</p>
+                  <p className="text-xs text-gray-500 mt-1">Branch: {item.branch.name}</p>
                 ) : (
                   item.branch && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-500 mt-1">
                       Branch: {extractValue(item.branch)}
                     </p>
                   )
@@ -591,10 +592,10 @@ export default function FoodItemList() {
                 {item.category &&
                 typeof item.category === "object" &&
                 item.category.name ? (
-                  <p className="text-sm text-gray-600">Category: {item.category.name}</p>
+                  <p className="text-xs text-gray-500 mt-1">Category: {item.category.name}</p>
                 ) : (
                   item.category && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-500 mt-1">
                       Category: {extractValue(item.category)}
                     </p>
                   )
@@ -602,22 +603,22 @@ export default function FoodItemList() {
                 {item.subcategory &&
                 typeof item.subcategory === "object" &&
                 item.subcategory.name ? (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-500 mt-1">
                     Subcategory: {item.subcategory.name}
                   </p>
                 ) : (
                   item.subcategory && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-500 mt-1">
                       Subcategory: {extractValue(item.subcategory)}
                     </p>
                   )
                 )}
                 {item.variations && item.variations.length > 0 && (
                   <div className="mt-2">
-                    <p className="font-semibold text-gray-800">Variations:</p>
-                    <ul className="list-disc pl-5">
+                    <p className="font-semibold text-gray-800 text-sm">Variations:</p>
+                    <ul className="list-disc pl-4 text-sm text-gray-600">
                       {item.variations.map((variation, index) => (
-                        <li key={index} className="text-sm text-gray-600">
+                        <li key={index}>
                           {variation.name} - {extractValue(variation.price)} Rs
                         </li>
                       ))}
@@ -628,13 +629,13 @@ export default function FoodItemList() {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEditClick(item)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-150"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-300 text-sm font-medium"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(id)}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-150"
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300 text-sm font-medium"
                 >
                   Delete
                 </button>
@@ -646,21 +647,21 @@ export default function FoodItemList() {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6 text-sm">
               Are you sure you want to delete this item?
             </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-150"
+                className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={() => deleteFoodItem(showDeleteConfirm)}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-150"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300 text-sm font-medium"
               >
                 Delete
               </button>
