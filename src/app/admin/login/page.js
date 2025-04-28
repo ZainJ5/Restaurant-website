@@ -25,7 +25,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 via-white to-red-100 p-4">
+    <div className="min-h-screen flex items-center text-black justify-center bg-gradient-to-br from-red-100 via-white to-red-100 p-4">
       <div className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md transform transition-all hover:shadow-xl">
         <div className="flex justify-center mb-6">
           <Image
