@@ -30,8 +30,8 @@ export async function GET() {
           $group: {
             _id: "$items.id",
             name: { $first: "$items.name" },
-            quantitySold: { $sum: "$items.quantity" },
-            totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }, 
+            quantitySold: { $sum: 1 },
+            totalRevenue: { $sum: "$items.price" },
           },
         },
         { $sort: { quantitySold: -1 } },
@@ -89,17 +89,18 @@ export async function GET() {
             _id: 0,
           },
         },
-        { $sort: { month: -1 } },
+        { $sort: { month: 1 } },
         { $limit: 12 },
       ]),
 
+      // Weekly sales aggregation
       Order.aggregate([
         { $match: { isCompleted: true } },
         {
           $group: {
             _id: {
               year: { $year: "$createdAt" },
-              week: { $week: "$createdAt" },
+              week: { $week: "$createdAt" }
             },
             total: { $sum: "$total" },
           },
@@ -123,8 +124,8 @@ export async function GET() {
             _id: 0,
           },
         },
-        { $sort: { week: -1 } },
-        { $limit: 12 },
+        { $sort: { week: 1 } },
+        { $limit: 10 },
       ]),
     ]);
 
@@ -137,8 +138,8 @@ export async function GET() {
         totalRevenue: item.totalRevenue,
       })),
       topAreas: topAreasResult,
-      monthlySales: monthlySalesResult,
-      weeklySales: weeklySalesResult,
+      monthlySales: monthlySalesResult.slice().reverse(), // Ensure newest months appear first
+      weeklySales: weeklySalesResult.slice().reverse(), // Ensure newest weeks appear first
     };
 
     return NextResponse.json(stats, { status: 200 });

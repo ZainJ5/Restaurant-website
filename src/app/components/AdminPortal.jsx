@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import AddBranchForm from "./AddBranchForm";
 import AddCategoryForm from "./CategoryForm";
 import AddSubcategoryForm from "./SubcategoryForm";
@@ -10,159 +11,29 @@ import FoodItemList from "./FoodItemList";
 import CategoryList from "./CategoryList";
 import SubcategoryList from "./SubcategoryList";
 import PromoCodesManager from "./PromoCodesManager";
-import { RefreshCw } from "lucide-react";
+import Statistics from "./Statistics";
 
-function Statistics() {
-  const [stats, setStats] = useState({
-    totalSales: 0,
-    topItems: [],
-    topAreas: [],
-    monthlySales: [],
-    weeklySales: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [graphType, setGraphType] = useState("monthly"); // Toggle between monthly/weekly
-
-  const fetchStatistics = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/statistics");
-      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-      const data = await res.json();
-      setStats(data);
-    } catch (error) {
-      console.error("Error fetching statistics:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStatistics();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-600"></div>
-      </div>
-    );
-  }
-
-  const salesData = graphType === "monthly" ? stats.monthlySales : stats.weeklySales;
-  const graphLabel = graphType === "monthly" ? "Monthly Sales Trend" : "Weekly Sales Trend";
-
-  return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-semibold text-gray-800">E-commerce Statistics</h3>
+const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-auto shadow-xl">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">{message}</h3>
+      <div className="flex justify-end space-x-3">
         <button
-          onClick={fetchStatistics}
-          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          onClick={onCancel}
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh
+          Cancel
+        </button>
+        <button
+          onClick={onConfirm}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+        >
+          Confirm
         </button>
       </div>
-
-      {/* Total Sales */}
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-700 mb-2">Total Sales</h4>
-        <p className="text-3xl font-bold text-green-600">
-          Rs. {stats.totalSales.toLocaleString()}
-        </p>
-      </div>
-
-      {/* Top Items */}
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-700 mb-4">Top 5 Items</h4>
-        {stats.topItems.length > 0 ? (
-          <ul className="space-y-3">
-            {stats.topItems.map((item, index) => (
-              <li
-                key={item.id}
-                className="flex justify-between items-center p-2 bg-gray-50 rounded-md"
-              >
-                <span className="text-gray-700">
-                  {index + 1}. {item.name}
-                </span>
-                <span className="text-gray-600">
-                  {item.quantitySold} units (Rs. {item.totalRevenue.toLocaleString()})
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No items sold yet.</p>
-        )}
-      </div>
-
-      {/* Top Areas */}
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-700 mb-4">Top 5 Delivery Areas</h4>
-        {stats.topAreas.length > 0 ? (
-          <ul className="space-y-3">
-            {stats.topAreas.map((area, index) => (
-              <li
-                key={area.name}
-                className="flex justify-between items-center p-2 bg-gray-50 rounded-md"
-              >
-                <span className="text-gray-700">
-                  {index + 1}. {area.name}
-                </span>
-                <span className="text-gray-600">
-                  {area.orderCount} orders (Rs. {area.totalRevenue.toLocaleString()})
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No orders in delivery areas yet.</p>
-        )}
-      </div>
-
-      {/* Sales Trend */}
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <div className="flex justify-between items-center mb-4">
-          <h4 className="text-lg font-semibold text-gray-700">{graphLabel}</h4>
-          <button
-            onClick={() => setGraphType(graphType === "monthly" ? "weekly" : "monthly")}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-          >
-            Show {graphType === "monthly" ? "Weekly" : "Monthly"} Graph
-          </button>
-        </div>
-        {salesData.length > 0 ? (
-          <div className="h-64 flex items-end space-x-2">
-            {salesData.map((data) => {
-              const maxSales = Math.max(...salesData.map((m) => m.total));
-              const heightPercentage = maxSales > 0 ? (data.total / maxSales) * 100 : 0;
-              const label = graphType === "monthly"
-                ? new Date(data.month + "-01").toLocaleString("default", {
-                    month: "short",
-                    year: "2-digit",
-                  })
-                : data.week; // Display as YYYY-WWW for weeks
-              return (
-                <div key={data.month || data.week} className="flex-1 flex flex-col items-center">
-                  <div
-                    className="bg-red-600 w-full rounded-t-md transition-all duration-300 hover:bg-red-700"
-                    style={{ height: `${heightPercentage}%` }}
-                    title={`Rs. ${data.total.toLocaleString()}`}
-                  ></div>
-                  <p className="text-xs text-gray-600 mt-2">{label}</p>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-gray-500">No sales data available.</p>
-        )}
-      </div>
     </div>
-  );
-}
+  </div>
+);
 
 export default function AdminPortal() {
   const [selectedTab, setSelectedTab] = useState("branch");
@@ -175,6 +46,7 @@ export default function AdminPortal() {
   const [newAreaName, setNewAreaName] = useState("");
   const [newAreaFee, setNewAreaFee] = useState("");
   const [editingArea, setEditingArea] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     fetchBranches();
@@ -251,6 +123,10 @@ export default function AdminPortal() {
     }
   };
 
+  const handleToggleSiteStatus = () => {
+    setShowConfirmation(true);
+  };
+
   const toggleSiteStatus = async () => {
     try {
       const newStatus = !siteStatus;
@@ -268,6 +144,8 @@ export default function AdminPortal() {
       }
     } catch (error) {
       console.error("Error updating site status:", error);
+    } finally {
+      setShowConfirmation(false);
     }
   };
 
@@ -472,7 +350,7 @@ export default function AdminPortal() {
                       ? setEditingArea({ ...editingArea, name: e.target.value })
                       : setNewAreaName(e.target.value)
                   }
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                   placeholder="Enter area name"
                   required
                 />
@@ -487,7 +365,7 @@ export default function AdminPortal() {
                       ? setEditingArea({ ...editingArea, fee: e.target.value })
                       : setNewAreaFee(e.target.value)
                   }
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                   placeholder="Enter delivery fee"
                   min="0"
                   required
@@ -496,7 +374,7 @@ export default function AdminPortal() {
               <div className="flex space-x-4">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-md hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                 >
                   {editingArea ? "Update Area" : "Add Area"}
                 </button>
@@ -504,7 +382,7 @@ export default function AdminPortal() {
                   <button
                     type="button"
                     onClick={() => setEditingArea(null)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
                   >
                     Cancel
                   </button>
@@ -516,25 +394,25 @@ export default function AdminPortal() {
               {deliveryAreas.length === 0 ? (
                 <p className="text-gray-500">No delivery areas added yet.</p>
               ) : (
-                <ul className="space-y-2">
+                <ul className="space-y-2 divide-y divide-gray-100">
                   {deliveryAreas.map((area) => (
                     <li
                       key={area._id}
-                      className="flex justify-between items-center p-2 border-b border-gray-200"
+                      className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-md transition-colors duration-200"
                     >
-                      <span>
-                        {area.name} (Rs. {area.fee})
+                      <span className="font-medium">
+                        {area.name} <span className="text-gray-500 text-sm ml-2">(Rs. {area.fee})</span>
                       </span>
                       <div className="space-x-2">
                         <button
                           onClick={() => setEditingArea(area)}
-                          className="text-blue-500 hover:underline"
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => deleteDeliveryArea(area._id)}
-                          className="text-red-500 hover:underline"
+                          className="text-red-600 hover:text-red-800 transition-colors"
                         >
                           Delete
                         </button>
@@ -554,51 +432,108 @@ export default function AdminPortal() {
   };
 
   return (
-    <div className="min-h-screen text-black bg-gradient-to-br from-gray-100 to-gray-200 p-4">
+    <div className="min-h-screen text-black bg-gradient-to-br from-gray-50 to-gray-200 p-4">
       <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row h-[92vh]">
-        <div className="hidden md:block w-full md:w-1/4 bg-[#ba0000] text-white p-4 overflow-y-auto">
-          <h2 className="text-xl font-semibold mb-4">Admin Menu</h2>
+        {/* Desktop Sidebar */}
+        <div 
+          className="hidden md:block w-full md:w-1/4 bg-gradient-to-br from-[#ba0000] to-[#930000] text-white p-6" 
+          style={{ 
+            overflowY: 'auto',
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none',  /* IE and Edge */
+          }}
+        >
+          <div className="flex justify-center mb-8">
+            <Image 
+              src="/logo.png" 
+              alt="Tipu Restaurant Logo" 
+              width={120} 
+              height={120} 
+              className="object-contain drop-shadow-md"
+            />
+          </div>
+          <h2 className="text-xl font-semibold mb-6 text-center text-white">Admin Dashboard</h2>
           <button
-            onClick={toggleSiteStatus}
-            className={`w-full text-left px-3 py-2 mb-4 rounded-md text-sm font-medium transition duration-150 ${
-              siteStatus ? "bg-green-600 hover:bg-green-700" : "bg-red-800 hover:bg-red-900"
+            onClick={handleToggleSiteStatus}
+            className={`w-full text-left px-4 py-3 mb-8 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-between ${
+              siteStatus 
+                ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg" 
+                : "bg-gradient-to-r from-red-700 to-red-800 hover:from-red-800 hover:to-red-900 shadow-lg"
             }`}
           >
-            {siteStatus ? "Turn Site Off" : "Turn Site On"}
+            <span className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              {siteStatus ? "Site is Online" : "Site is Offline"}
+            </span>
+            <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+              {siteStatus ? "ON" : "OFF"}
+            </span>
           </button>
-          <ul className="space-y-2">
-            {["branch", "category", "subcategory", "foodItem", "orders", "items", "allCategories", "allSubcategories", "promocodes", "deliveryAreas", "statistics"].map((tab) => (
-              <li key={tab}>
-                <button
-                  onClick={() => setSelectedTab(tab)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition duration-150 ${
-                    selectedTab === tab ? "bg-red-800" : "hover:bg-red-700"
-                  }`}
-                >
-                  {tab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <ul className="space-y-1.5">
+              {["branch", "category", "subcategory", "foodItem", "orders", "items", "allCategories", "allSubcategories", "promocodes", "deliveryAreas", "statistics"].map((tab) => (
+                <li key={tab}>
+                  <button
+                    onClick={() => setSelectedTab(tab)}
+                    className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center ${
+                      selectedTab === tab 
+                        ? "bg-red-800 bg-opacity-70 shadow-md transform translate-x-1 border-l-4 border-white" 
+                        : "hover:bg-red-700 hover:bg-opacity-40"
+                    }`}
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className={`h-4 w-4 mr-3 transition-transform duration-300 ${selectedTab === tab ? 'rotate-90' : ''}`}
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                    {tab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div className="block md:hidden bg-[#ba0000] text-white p-4">
-          <h2 className="text-lg font-semibold mb-2">Admin Menu</h2>
+        {/* Mobile Header */}
+        <div className="block md:hidden bg-gradient-to-r from-[#ba0000] to-[#930000] text-white p-4">
+          <div className="flex items-center justify-center mb-2">
+            <Image 
+              src="/logo.png" 
+              alt="Tipu Restaurant Logo" 
+              width={60} 
+              height={60} 
+              className="object-contain drop-shadow-md"
+            />
+            <h2 className="text-lg font-semibold ml-2">Tipu Admin</h2>
+          </div>
           <button
-            onClick={toggleSiteStatus}
-            className={`w-full text-left px-3 py-2 mb-2 rounded-md text-sm font-medium transition duration-150 ${
-              siteStatus ? "bg-green-600 hover:bg-green-700" : "bg-red-800 hover:bg-red-900"
+            onClick={handleToggleSiteStatus}
+            className={`w-full text-center px-3 py-2 mb-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center ${
+              siteStatus 
+                ? "bg-gradient-to-r from-green-500 to-green-600 shadow-md" 
+                : "bg-gradient-to-r from-red-700 to-red-800 shadow-md"
             }`}
           >
-            {siteStatus ? "Turn Site Off" : "Turn Site On"}
+            {siteStatus ? "Site is Online (ON)" : "Site is Offline (OFF)"}
           </button>
-          <div className="flex overflow-x-auto space-x-2">
+          <div className="flex overflow-x-auto space-x-2 pb-2 no-scrollbar">
             {["branch", "category", "subcategory", "foodItem", "orders", "items", "allCategories", "allSubcategories", "promocodes", "deliveryAreas", "statistics"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
-                className={`px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition duration-150 ${
-                  selectedTab === tab ? "bg-red-800" : "hover:bg-red-700"
+                className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-150 ${
+                  selectedTab === tab ? "bg-red-800 shadow-md" : "hover:bg-red-700 hover:bg-opacity-70"
                 }`}
               >
                 {tab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
@@ -607,17 +542,36 @@ export default function AdminPortal() {
           </div>
         </div>
 
-        <div className="w-full md:w-3/4 p-4 overflow-y-auto">
-          <div className="flex justify-center items-center mb-4">
-            <h1 className="text-3xl font-bold capitalize text-[#ba0000]">
+        {/* Main Content */}
+        <div className="w-full md:w-3/4 p-4 overflow-y-auto bg-gray-50">
+          <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
+            <h1 className="text-2xl font-bold capitalize text-[#ba0000]">
               {selectedTab.replace(/([A-Z])/g, " $1").replace(/^\w/, (c) => c.toUpperCase())}
             </h1>
+            <div className="text-sm text-gray-500 font-medium bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
+              {new Date().toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
           </div>
-          <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
+          <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-100">
             {renderContent()}
           </div>
         </div>
       </div>
+      
+      {showConfirmation && (
+        <ConfirmationDialog 
+          message={`Are you sure you want to turn the site ${siteStatus ? 'OFF' : 'ON'}?`}
+          onConfirm={toggleSiteStatus}
+          onCancel={() => setShowConfirmation(false)}
+        />
+      )}
     </div>
   );
 }

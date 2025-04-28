@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import Image from 'next/image';
 
 export default function Login() {
   const router = useRouter();
   const predefinedUsername = "admin";
-  const predefinedPassword = "admin123"; 
+  const predefinedPassword = "admin123";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,14 +25,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r text-black from-gray-100 to-gray-200 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
-          Admin Login
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 via-white to-red-100 p-4">
+      <div className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md transform transition-all hover:shadow-xl">
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/logo.png"
+            alt="Restaurant Logo"
+            width={120}
+            height={120}
+            className="object-contain"
+            priority
+          />
+        </div>
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          Admin Portal
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <p className="text-center text-gray-500 mb-8">
+          Welcome to Restaurant Admin
+        </p>
+        <div onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-gray-700 mb-2">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
               Username
             </label>
             <input
@@ -41,11 +55,11 @@ export default function Login() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors bg-gray-50"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <input
@@ -55,19 +69,25 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors bg-gray-50"
             />
           </div>
           {error && (
-            <p className="text-red-500 text-center">{error}</p>
+            <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">
+              {error}
+            </p>
           )}
           <button
             type="submit"
-            className="w-full py-2 bg-[#ba0000] text-white rounded hover:bg-[#c74949] transition-colors"
+            className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+            onClick={handleSubmit}
           >
-            Login
+            Sign In
           </button>
-        </form>
+        </div>
+        <p className="mt-6 text-center text-gray-500 text-sm">
+          Restaurant Admin Dashboard &copy; {new Date().getFullYear()}
+        </p>
       </div>
     </div>
   );
