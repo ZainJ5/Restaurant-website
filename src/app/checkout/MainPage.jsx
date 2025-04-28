@@ -6,7 +6,6 @@ import { useOrderTypeStore } from "../../store/orderTypeStore";
 import { useCartStore } from "../../store/cart";
 import { useBranchStore } from "../../store/branchStore";
 import DeliveryPickupModal from "../components/DeliveryPickupModal";
-import { areasOfLahore } from "../lib/deliveryAreas";
 import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
@@ -28,6 +27,7 @@ export default function CheckoutPage() {
   const [promoCodes, setPromoCodes] = useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState(0);
   const [receiptFile, setReceiptFile] = useState(null);
+  const [deliveryAreas, setDeliveryAreas] = useState([]);
 
   const [paymentType, setPaymentType] = useState("cod");
   const [onlineOption, setOnlineOption] = useState(null);
@@ -85,13 +85,32 @@ export default function CheckoutPage() {
         });
       }
     }
+    async function fetchDeliveryAreas() {
+      try {
+        const res = await fetch("/api/delivery-areas");
+        if (res.ok) {
+          const data = await res.json();
+          setDeliveryAreas(data);
+        } else {
+          toast.error("Failed to fetch delivery areas. Please try again later.", {
+            style: { background: "#dc2626", color: "#ffffff" },
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching delivery areas:", error);
+        toast.error("Error fetching delivery areas. Please try again later.", {
+          style: { background: "#dc2626", color: "#ffffff" },
+        });
+      }
+    }
     fetchPromoCodes();
+    fetchDeliveryAreas();
   }, []);
 
   useEffect(() => {
     setAppliedDiscount(subtotal * 0.1);
   }, [subtotal]);
-  
+
   const handleApplyPromo = () => {
     if (!promoCode.trim()) {
       toast.error("Please enter a promo code.", {
@@ -116,7 +135,7 @@ export default function CheckoutPage() {
       });
     }
   };
-  
+
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
       toast.error("Your cart is empty. Please add items before placing an order.", {
@@ -132,7 +151,7 @@ export default function CheckoutPage() {
     }
     const phoneRegex = /^03[0-9]{9}$/;
     if (!phoneRegex.test(mobileNumber.trim())) {
-      alert("Please enter a valid number")
+      alert("Please enter a valid number");
       toast.error("Please enter a valid number", {
         style: { background: "#dc2626", color: "#ffffff" },
       });
@@ -186,7 +205,7 @@ export default function CheckoutPage() {
         type: item.type,
         quantity: item.quantity,
         title: item.title,
-        imageUrl: item.imageUrl || `/api/placeholder/100/100`
+        imageUrl: item.imageUrl || `/api/placeholder/100/100`,
       }));
       const completeAddress = deliveryAddress.trim() + ", " + selectedArea.name;
 
@@ -231,13 +250,13 @@ export default function CheckoutPage() {
       }
       const data = await response.json();
       console.log("Order placed successfully:", data);
-      
+
       // Create order details object to save in session storage
       const orderDetails = {
         orderId: data.orderId || `ORD-${Date.now()}`,
         orderDate: new Date().toISOString(),
-        status: 'Confirmed',
-        estimatedDelivery: 'Within 1 hour',
+        status: "Confirmed",
+        estimatedDelivery: "Within 1 hour",
         customerName: fullName,
         fullName: fullName,
         mobileNumber: mobileNumber,
@@ -245,29 +264,32 @@ export default function CheckoutPage() {
         deliveryAddress: completeAddress,
         nearestLandmark: nearestLandmark,
         area: selectedArea.name,
-        branch: branch?.name || 'Main Branch',
-        paymentMethod: paymentType === 'cod' ? 'Cash on Delivery' : 'Online Payment',
-        bankName: paymentType === 'online' ? (
-          onlineOption === 'easypaisa' ? 'EasyPaisa' : 
-          onlineOption === 'jazzcash' ? 'JazzCash' : 
-          'Bank Transfer'
-        ) : undefined,
+        branch: branch?.name || "Main Branch",
+        paymentMethod: paymentType === "cod" ? "Cash on Delivery" : "Online Payment",
+        bankName:
+          paymentType === "online"
+            ? onlineOption === "easypaisa"
+              ? "EasyPaisa"
+              : onlineOption === "jazzcash"
+              ? "JazzCash"
+              : "Bank Transfer"
+            : undefined,
         subtotal: subtotal,
         deliveryFee: deliveryFee,
         discount: appliedDiscount,
         total: grandTotal,
-        items: orderItems
+        items: orderItems,
       };
-      
+
       // Save order details to session storage
-      sessionStorage.setItem('lastOrder', JSON.stringify(orderDetails));
-      
+      sessionStorage.setItem("lastOrder", JSON.stringify(orderDetails));
+
       clearCart();
       resetFormFields();
-      
+
       // Redirect to order confirmation page instead of home page
       router.push("/order");
-      
+
       toast.success("Your order has been placed successfully!", {
         style: { background: "#16a34a", color: "#ffffff" },
       });
@@ -396,7 +418,7 @@ export default function CheckoutPage() {
                   <select
                     value={selectedArea ? selectedArea.name : ""}
                     onChange={(e) => {
-                      const selected = areasOfLahore.find(
+                      const selected = deliveryAreas.find(
                         (area) => area.name === e.target.value
                       );
                       setSelectedArea(selected);
@@ -404,8 +426,8 @@ export default function CheckoutPage() {
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md"
                   >
                     <option value="">Select an area</option>
-                    {areasOfLahore.map((area) => (
-                      <option key={area.name} value={area.name}>
+                    {deliveryAreas.map((area) => (
+                      <option key={area._id} value={area.name}>
                         {area.name} (Fee: Rs. {area.fee})
                       </option>
                     ))}
@@ -666,7 +688,10 @@ export default function CheckoutPage() {
               {items.length > 0 && (
                 <div className="mb-4 space-y-2">
                   {items.map((item, index) => (
-                    <div key={`${item.id}-${index}`} className="flex justify-between text-sm text-gray-700">
+                    <div
+                      key={`${item.id}-${index}`}
+                      className="flex justify-between text-sm text-gray-700"
+                    >
                       <span>
                         {item.title} x {item.quantity}
                       </span>

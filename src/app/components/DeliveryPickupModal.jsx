@@ -5,27 +5,11 @@ import { useBranchStore } from "../../store/branchStore";
 import { Truck, ShoppingBag } from "lucide-react";
 
 export default function DeliveryPickupModal() {
-  const currentHour = new Date().getHours();
-  const currentMinutes = new Date().getMinutes();
-
-  // const isBeforeOpening = (currentHour < 11) || (currentHour === 11 && currentMinutes < 30);
-  // const isAfterClosing = (currentHour >= 3 && currentHour < 11) || (currentHour === 11 && currentMinutes < 30);
-  
-  // if (isBeforeOpening || isAfterClosing) {
-  //   return (
-  //     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-  //       <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
-  //         <div className="bg-red-600 text-white text-center py-4 px-6">
-  //           <h2 className="text-2xl font-bold">Service timing 11:30am-3am</h2>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const [isSiteActive, setIsSiteActive] = useState(true); // Track site status
 
   const { orderType, setOrderType } = useOrderTypeStore();
   const { branch, setBranch } = useBranchStore();
-  
+
   const [branches, setBranches] = useState([
     {
       _id: "67b904f9397c3ee1c79e08d1",
@@ -35,7 +19,24 @@ export default function DeliveryPickupModal() {
       __v: 0,
     },
   ]);
-  
+
+  const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    async function fetchSiteStatus() {
+      try {
+        const res = await fetch("/api/site-status");
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const data = await res.json();
+        setIsSiteActive(data.isSiteActive);
+      } catch (error) {
+        console.error("Error fetching site status:", error);
+        setIsSiteActive(false); // Default to inactive on error
+      }
+    }
+    fetchSiteStatus();
+  }, []);
+
   useEffect(() => {
     if (!branch && branches.length > 0) {
       setBranch(branches[0]);
@@ -57,8 +58,6 @@ export default function DeliveryPickupModal() {
     fetchBranches();
   }, []);
   */
-
-  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     if (branch && orderType) {
@@ -86,6 +85,18 @@ export default function DeliveryPickupModal() {
   const handleBranchSelect = (selectedBranch) => {
     setBranch(selectedBranch);
   };
+
+  if (!isSiteActive) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden animate-fadeIn">
+          <div className="bg-red-600 text-white text-center py-4 px-6">
+            <h2 className="text-2xl font-bold">Service Currently Unavailable</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!open) return null;
 
